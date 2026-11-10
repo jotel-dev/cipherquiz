@@ -1,0 +1,17 @@
+{
+  "name": "@cipherquiz/blockchain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@zama-fhe/sdk": "3.7.2",
+    "viem": "^2.0.0"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "cipherquiz",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "contracts"
+  ],
+  "engines": {
+    "node": ">=22.12.0 <25",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "npm run dev -w @cipherquiz/web",
+    "dev:api": "npm run dev -w @cipherquiz/api",
+    "build": "npm run build -w @cipherquiz/shared && npm run build -w @cipherquiz/blockchain && npm run build -w @cipherquiz/api && npm run build -w @cipherquiz/web && npm run build -w @cipherquiz/contracts",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . && npm run lint -w @cipherquiz/contracts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "check": "npm run build && npm run typecheck && npm run lint && npm run format:check && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-solidity": "^2.3.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.59.1",
+    "tsx": "^4.20.0"
+  }
+}
