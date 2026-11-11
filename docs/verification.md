@@ -1,5 +1,54 @@
 # Verification record
 
+## Stage A: Sepolia predeployment review (2026-11-11)
+
+Implementation checkpoint `accb8f671466a5ab7a224c9af19e97f3214f35d6` was committed and pushed on `feat/sepolia-fhe-verification`; `git ls-remote` returned the identical remote hash. The branch starts from frontend commit `8ccbcb9`, preserves the existing scoring/frontend work and all pending Sepolia preparation, and changes no Solidity or frontend sources. No main-branch commit, merge, force-push, deployment or other Sepolia transaction occurred.
+
+The current [predeployment report](sepolia-predeployment.md) records the contract review, installed/current official Zama tooling comparison, exact future deployment command, constructor, public-address requirement, fee/budget proposal, secrets boundary and unresolved remote-KMS denial test. The [integration runbook](sepolia-integration.md) describes secure configuration and the separately gated commands. No deployment or live-test approval flag was set during this review.
+
+| Check                                                                  | Stage A result                                                                                                                                                                                           |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run check`                                                        | Pass: all five builds, workspace typechecks, ESLint/Solhint, formatting and 26 local tests                                                                                                               |
+| Local tests                                                            | 3 API, 4 existing frontend, 5 orchestration guards, 14 Hardhat; zero failures/skips                                                                                                                      |
+| `npm audit --omit=dev --json`                                          | Pass: zero known production dependency vulnerabilities                                                                                                                                                   |
+| Read-only Sepolia preflight                                            | Pass at block `12112749`: chain `11155111`, SDK/Solidity address parity, executor-resolved input verifier and code presence                                                                              |
+| Unsigned local deployment estimate                                     | 1,545,261 gas; margin limit 1,854,314; chain 31337 only, no transaction submitted                                                                                                                        |
+| Targeted literal-secret scan                                           | 128 tracked/untracked source files scanned; zero findings for private-key literals, private-key blocks and credential-bearing HTTP authority patterns; limited pattern check, not a general secret audit |
+| `git diff --check` and final formatting                                | Pass                                                                                                                                                                                                     |
+| Signer-specific Sepolia estimate/balance                               | Blocked: public operator address and secure signer setup unavailable                                                                                                                                     |
+| Real encrypted scoring, player KMS decryption and live negative checks | Not run; require explicit Stage B approval and credentials                                                                                                                                               |
+| Independent remote KMS denial                                          | Unverified; SDK V1/V2 user-decryption paths check ACL before relayer submission                                                                                                                          |
+
+Changes add read-only preflight, public deployment-address pinning, live duplicate/unauthorized-action simulations requiring exact decoded custom errors, receipt/block/gas/timing diagnostics, and pre-network signer-isolation/scalar/budget checks. Deployment plus a complete integration run would make four writes total: deployment, create round, submit answers, finalize. Negative action checks use read-only calls; they do not spend gas on deliberately reverting transactions. Budget allocations are separate per invocation and must be agreed in aggregate.
+
+The initial sandboxed build failed at the existing Vite/esbuild parent-directory restriction. The full check passed with authorized external execution. Fetch, public-RPC and npm-advisory calls also needed external execution after sandbox network failures. An explicit formatter invocation on `.env.example` had no parser; supported files were formatted successfully, followed by passing repository-wide formatting. These failures were not application/security test passes, and none authorized a blockchain write. No clean-install reproduction was performed.
+
+Stop condition: obtain real public operator details and selected caps, refresh the read-only signer-specific estimate, then request explicit deployment approval for the reviewed signer/artifact/constructor/network/budget. Integration transactions require explicit authorization of their scope too. Never infer remote KMS denial from the local/mock tests or SDK ACL rejection. The earlier records below are historical evidence from their stated scopes.
+
+## Sepolia integration preparation (2026-11-11)
+
+Started on clean `feat/encrypted-scoring` at `1ba8282`. Reviewed the existing scoring contract, tests, compatibility layer, pinned SDK sources and current official Zama documentation. Prepared an explicit current-SDK live integration test and a separately approval-gated deployment script. The contract, existing FHE tests, application code, dependency versions and lockfile remain unchanged. No deployment, transaction broadcast, push or merge occurred. The complete [runbook, secure environment setup and evidence boundaries](sepolia-integration.md) are recorded separately from local mock results.
+
+The new local guard suite has four passing tests for live-run configuration, packed-input bounds, precise ACL-denial classification and immutable-aware runtime identity checks. These tests exercise ordinary orchestration logic, not encrypted computation. Existing FHEVM tests still run in the official local mock environment. Integration files and deployment scripts are included in normal workspace typechecking.
+
+The explicit `npm run test:sepolia -w @cipherquiz/blockchain` invocation failed closed at the unset approval/configuration guard with zero network requests or broadcasts. This is an expected blocked live run, **not** a successful Sepolia integration test. No contract address exists and no signer credentials were supplied. Deployment was not invoked. Real proof generation/acceptance, live scoring, authorized KMS decryption, live unauthorized access and network gas costs remain unverified.
+
+Installed SDK 3.7.2 exposes the required generic encryption/decryption APIs. Its internal SDK 0.13.2 checks `persistAllowed` before forwarding user decryption to the relayer. The harness therefore distinguishes an SDK ACL rejection against onchain permissions from independent remote KMS denial; it cannot establish the latter through this supported API. A remote-denial test route remains required before staking. No cleartext backend, mock successful integration or undocumented SDK bypass is used.
+
+During preparation, a Viem transaction-union typing error and one lint warning in the new runner were corrected; targeted typechecking and linting then passed. Final `npm run check` passed: all five workspace builds, all workspace typechecks (including integration and deployment code), ESLint/Solhint, formatting and **21 local tests** (3 API, 4 orchestration guards, 14 Hardhat including the original smoke test). There were zero local failures or skips. `npm run format` and `git diff --check` also passed. The complete check ran with external execution permission for the known Windows Vite/esbuild parent-directory restriction; it did not run deployment or live integration. `npm audit --omit=dev` passed with zero vulnerabilities. A new clean dependency installation was not performed.
+
+| Verification class                   | Result                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
+| Build, typecheck, lint, format check | Pass through `npm run check`                                                   |
+| `npm run format`                     | Pass                                                                           |
+| Local tests                          | 21 passing, zero skips                                                         |
+| Production dependency audit          | Zero vulnerabilities                                                           |
+| Explicit Sepolia test                | Blocked/failing at approval guard; not counted as a local pass or live success |
+| Deployment script                    | Type-checked only; not executed                                                |
+| Proofs, KMS and gas on Sepolia       | Unverified; no deployment exists                                               |
+
+Before a real run: obtain explicit deployment approval, configure dedicated Sepolia-only operator/player environment signers and trusted HTTPS RPC securely, set fee budgets, fund test accounts, deploy the reviewed artifact, and provide its actual address. Only then authorize and run the separate live test. Retain redacted receipts/results and resolve SDK/protocol or KMS evidence gaps before confidential staking.
+
 ## Phase 2: encrypted scoring (2026-11-11)
 
 Environment: Windows PowerShell, Node.js 24.15.0, npm 11.12.1. Work started on `feat/encrypted-scoring` with a clean working tree at `adbe85c`. Fetched `origin`; HEAD and `origin/main` initially had zero divergent commits. All application sources, workspace manifests, the lockfile and installed Zama/plugin declarations were reviewed before implementation. No dependency versions or lockfile entries changed.
