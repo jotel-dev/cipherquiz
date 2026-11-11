@@ -19,7 +19,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: { chainId: 31337 },
-    // Read-only until deployment is explicitly designed and authorized.
+    // No automatic account loading; the separate deployment script requires approval.
     sepolia: {
       chainId: 11155111,
       url: process.env.SEPOLIA_RPC_URL ?? '',

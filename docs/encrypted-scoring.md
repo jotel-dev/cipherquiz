@@ -2,6 +2,8 @@
 
 Implemented on 2026-11-11 with dummy data and no tokens. This is a local FHEVM proof of concept, not a deployed service or cryptographic security audit. The Phase 1 browser, Fastify API, PostgreSQL readiness boundary and disclaimer remain unchanged.
 
+Follow-up: the [Sepolia integration runbook](sepolia-integration.md) now documents a prepared, separate current-SDK test and approval-gated deployment script. No live deployment or cryptographic verification has occurred. SDK preflight ACL rejection is explicitly distinguished from remote KMS denial.
+
 ## Contract architecture
 
 `contracts/src/CipherQuizScoring.sol` inherits the existing foundation's `ZamaEthereumConfig`. Deployment fixes one nonzero `OPERATOR`; there is no upgrade, operator replacement, payment, token or settlement path.
@@ -105,4 +107,4 @@ Official sources reviewed alongside installed source on 2026-11-11:
 - Final score access is deliberately granted only at finalization. Operator/player availability is needed to finalize; unauthorized third parties cannot close a round. A player contract must be capable of calling the relevant methods.
 - Before testnet: verify current-SDK wire compatibility and real proof/ACL denial, benchmark latency and network HCU limits, review this contract independently, specify content canonicalization and authoring, test boundary round IDs, decide timing/finality policies and UI secret handling. Add browser/API integration only after that experiment. Deployment and any financial features remain separate work.
 
-Dependency manifests, lockfile, workspace boundaries and existing scripts are unchanged.
+Dependency versions, lockfile and application workspace boundaries remain unchanged. Follow-up Sepolia preparation extends workspace scripts and typechecking with separate, explicitly gated deployment/live-test commands; it does not alter this contract or its existing mock tests.

@@ -14,6 +14,8 @@ A token-free scoring contract and local FHEVM tests now cover encrypted keys and
 
 Keys are encrypted onchain, but their authoring operator knows their plaintext. Local FHEVM mocks do not establish live cryptographic confidentiality. See the [implemented contract architecture, SDK compatibility evidence and security limits](docs/encrypted-scoring.md), and the [verification record](docs/verification.md).
 
+An approval-gated Sepolia deployment script and separate current-SDK integration test are prepared. Neither has been exercised against a deployment. See the [Sepolia runbook and evidence boundaries](docs/sepolia-integration.md) before configuring or running them. Normal checks remain local.
+
 Quiza is gameplay inspiration only. No Quiza source code was used.
 
 ## Intended game
@@ -70,7 +72,7 @@ npm run start -w @cipherquiz/api
 npm run preview -w @cipherquiz/web
 ```
 
-Vite preview serves static assets only; its development API proxy is not a production deployment configuration. A future host must route same-origin API requests appropriately. `npm run node -w @cipherquiz/contracts` starts an optional local chain; the tests start their own in-process chain. There are no deployment commands.
+Vite preview serves static assets only; its development API proxy is not a production deployment configuration. A future host must route same-origin API requests appropriately. `npm run node -w @cipherquiz/contracts` starts an optional local chain; the tests start their own in-process chain. The separate Sepolia deployment command requires explicit approval and secure configuration; normal checks never invoke it.
 
 ## Repository map
 

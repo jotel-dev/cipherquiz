@@ -2,6 +2,8 @@
 
 Status: this document retains the longer-term design proposal. Phase 1 implements health checks and toolchain scaffolding. Phase 2 now implements a token-free local scoring subset; the [implemented architecture](encrypted-scoring.md) is authoritative for that contract, including its single-player rounds, batch deadline, encrypted context binding and final-score ACL. The settlement flows below remain unimplemented proposals.
 
+The [Sepolia preparation record](sepolia-integration.md) separates the new live-test harness from verified local mock results. Deployment and real network validation remain pending approval and configuration; confidential staking remains blocked.
+
 ## Components and data boundaries
 
 ```mermaid
