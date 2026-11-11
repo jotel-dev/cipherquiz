@@ -44,7 +44,7 @@ export function Dashboard() {
             <h2>
               You know more
               <br />
-              than you <span className="serif-word">think.</span>
+              than you <span className="heading-accent">think.</span>
             </h2>
             <p>
               Ten questions to find out. Choose a category,

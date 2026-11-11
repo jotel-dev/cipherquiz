@@ -59,6 +59,7 @@ export function Layout() {
     }
     const names: Record<string, string> = {
       '/': 'Confidential trivia',
+      '/how-it-works': 'How it works',
       '/dashboard': 'Your playroom',
       '/categories': 'Choose a category',
       '/play': 'Practice round',
@@ -68,18 +69,14 @@ export function Layout() {
     };
     document.title = `${names[location.pathname] ?? 'Page not found'} | CipherQuiz`;
   }, [location.pathname, location.hash]);
-  const links = isHome
-    ? [
-        { to: '/#how-it-works', name: 'How it works' },
-        { to: '/#categories', name: 'Categories' },
-        { to: '/leaderboard', name: 'Leaderboard' },
-      ]
-    : [
-        { to: '/dashboard', name: 'Playroom' },
-        { to: '/categories', name: 'Categories' },
-        { to: '/leaderboard', name: 'Leaderboard' },
-        { to: '/profile', name: 'My profile' },
-      ];
+  const links = [
+    { to: '/', name: 'Home' },
+    { to: '/how-it-works', name: 'How It Works' },
+    { to: '/dashboard', name: 'Play' },
+    { to: '/categories', name: 'Categories' },
+    { to: '/leaderboard', name: 'Leaderboard' },
+    { to: '/profile', name: 'Profile' },
+  ];
   return (
     <>
       <a href="#main-content" className="skip-link">
@@ -96,17 +93,11 @@ export function Layout() {
           )}
           {!isQuiz && (
             <nav className="desktop-nav" aria-label="Main navigation">
-              {links.map((link) =>
-                link.to.includes('#') ? (
-                  <Link key={link.name} to={link.to}>
-                    {link.name}
-                  </Link>
-                ) : (
-                  <NavLink key={link.name} to={link.to}>
-                    {link.name}
-                  </NavLink>
-                ),
-              )}
+              {links.map((link) => (
+                <NavLink key={link.name} to={link.to} end={link.to === '/'}>
+                  {link.name}
+                </NavLink>
+              ))}
             </nav>
           )}
           <div className="nav-actions">
@@ -120,9 +111,12 @@ export function Layout() {
               variant="outline"
               className="wallet-button"
               onClick={() => setWalletOpen(true)}
+              aria-label={
+                isConnected ? 'Manage connected wallet' : 'Connect wallet'
+              }
             >
               <Wallet size={16} />
-              <span>
+              <span className="wallet-label">
                 {isConnected
                   ? `${address?.slice(0, 6)}…${address?.slice(-4)}`
                   : 'Connect wallet'}
@@ -178,7 +172,7 @@ export function Layout() {
               </span>
             </span>
             {!isQuiz && (
-              <Link to="/#privacy">
+              <Link to="/how-it-works#confidentiality">
                 About confidentiality <ArrowUpRight size={12} />
               </Link>
             )}
@@ -189,7 +183,7 @@ export function Layout() {
         <Outlet />
       </main>
       {!isQuiz && (
-        <footer className="site-footer">
+        <footer className={`site-footer ${isHome ? 'site-footer-home' : ''}`}>
           <div className="container">
             <div className="footer-main">
               <div>
@@ -205,9 +199,11 @@ export function Layout() {
                 <Link to="/dashboard">
                   Play a round <ArrowUpRight size={14} />
                 </Link>
-                <Link to="/#how-it-works">How it works</Link>
-                <Link to="/#privacy">Confidentiality</Link>
-                <Link to="/profile">My profile</Link>
+                <Link to="/how-it-works">How It Works</Link>
+                <Link to="/categories">Categories</Link>
+                <Link to="/leaderboard">Leaderboard</Link>
+                <Link to="/how-it-works#confidentiality">Confidentiality</Link>
+                <Link to="/profile">Profile</Link>
               </div>
               <div className="footer-note">
                 <ShieldCheck size={22} />

@@ -1,6 +1,6 @@
 # CipherQuiz frontend
 
-Implemented locally on `feat/cipherquiz-frontend`. No deployment, push, merge or smart-contract source changes. Uncommitted work that already existed in the contract, blockchain and documentation directories was preserved.
+Implemented on `feat/cipherquiz-frontend`. The owner subsequently authorized frontend commits and pushes; no deployment, merge or smart-contract source changes were made. Uncommitted work that already existed in the contract, blockchain and documentation directories was preserved. See the [latest refinement handoff](refinement.md) for the simplified homepage, supplied logo and dedicated navigation.
 
 ## Preview
 
@@ -18,7 +18,8 @@ Follow **Play now → Start a practice round → choose a category → Set up yo
 
 | Route / surface                 | Implemented behavior                                                                                                                                                                   |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                             | Editorial landing page, responsive navigation, illustrated concept placeholder, category previews, how it works, privacy explanation, proposed payout tiers, exact required disclaimer |
+| `/`                             | Minimal landing page, approved logo, interactive trivia illustration, Play Now and How It Works actions, exact required disclaimer                                                     |
+| `/how-it-works`                 | Dedicated practice steps, confidentiality boundaries and illustrative total-return tiers                                                                                               |
 | `/dashboard`                    | Playroom, start action, real statistics from the current practice session, category shortcuts, recent rounds and first-use empty state                                                 |
 | `/categories`                   | Four shared categories, accessible radio selection, query-string preselection                                                                                                          |
 | Round setup dialog              | Practice stake, 30-second / 60-second / untimed choices, tier calculations, required acknowledgment, no transaction or signature                                                       |
@@ -43,20 +44,20 @@ Follow **Play now → Start a practice round → choose a category → Set up yo
 
 Local shadcn/ui Button and Dialog adaptations use Radix primitives and the existing CSS tokens. Radio groups and progress also use Radix. Lucide provides all interface iconography. No animation framework or redundant component suite was installed. [Design research and decisions](design-research.md) records the resources actually inspected, limitations, adopted patterns and rejected effects.
 
-Manrope is used for interface/body text, Space Grotesk for display headings and scores, with Georgia italic for a few editorial emphasis words. Google Fonts uses preconnect and `display=swap`, with local/system fallbacks. The base scale is 16px × 1.25, with fluid headings and optical label sizes. Motion honors `prefers-reduced-motion`; gameplay never waits for a reveal animation.
+Manrope is used for interface/body text and Space Grotesk for display headings and scores. These are the only two type families; italic serif styling was removed during refinement. Google Fonts uses preconnect and `display=swap`, with local/system fallbacks. The base scale is 16px × 1.25, with fluid headings and optical label sizes. Motion honors `prefers-reduced-motion`; gameplay never waits for a reveal animation.
 
 ## Approved artwork handoff
 
-No approved logo asset existed in the repository. `Logo.tsx` consistently renders the CipherQuiz wordmark and accepts an approved image URL. It does not invent a replacement C/question-mark/shield mark.
+The owner supplied the approved standalone PNG during refinement. `Logo.tsx` now renders that actual image in navigation, footer and gameplay, preserving its original dark lockup. Native favicons are exported from its mark. See [asset provenance](../../apps/web/public/brand/README.md).
 
-When owner-approved files are supplied, place them in `apps/web/public/brand/` and set the public values documented in `apps/web/.env.example`:
+Defaults are already integrated. Optional future owner-approved variants may override the public values documented in `apps/web/.env.example`:
 
 ```dotenv
 VITE_APPROVED_LOGO_URL=/brand/cipherquiz.svg
 VITE_APPROVED_FAVICON_URL=/brand/favicon.svg
 ```
 
-The logo component then uses the asset in navigation/footer/gameplay and `main.tsx` attaches the approved favicon. No placeholder favicon is shipped. The homepage hero is a deliberately labelled CSS concept composition, ready to be replaced by an approved illustration; it uses no downloaded stock art.
+The homepage hero is now a functioning DOM-based trivia illustration with local sample answers. It uses no screenshot crop or stock artwork.
 
 ## Validation
 
@@ -67,11 +68,11 @@ The logo component then uses the asset in navigation/footer/gameplay and `main.t
 | `npm.cmd run lint`                        | Passed, including Solidity lint                                                                               |
 | `npm.cmd run format:check`                | Run at the repository root; frontend and new documentation formatted with the existing Prettier configuration |
 | `npm.cmd test`                            | Passed: 3 API, 4 frontend model, 4 blockchain guard, 14 local contract tests                                  |
-| `npm.cmd run test:e2e -w @cipherquiz/web` | Passed: 10 Chrome browser tests                                                                               |
+| `npm.cmd run test:e2e -w @cipherquiz/web` | Passed: 12 Chrome browser tests after refinement                                                              |
 
 Browser coverage includes complete ten-question gameplay at **320, 375, 390, 428, 768, 1024 and 1440px**, layout overflow assertions on the primary screens, 44px minimum quiz-answer touch targets, dialog Escape/focus restoration, profile editing, leaderboard filtering, zero-score timeout/skip behavior, API recovery and controlled EIP-1193 wallet states. Axe checks WCAG A/AA rules on primary screens at 390 and 1440px, plus the connected wallet dialog. Reported contrast violations and a completion-navigation race were fixed before the clean passing run.
 
-Unverified: physical phones/tablets, Safari, Firefox, screen-reader interaction, slow real mobile hardware, real wallet extensions and actual Sepolia RPC/FHE transactions. No live blockchain test or deployment was attempted. Automated axe checks are not a full accessibility certification. The production JS bundle is approximately 493 kB before gzip / 157 kB gzip; CSS is approximately 51 kB / 11 kB gzip.
+Unverified: physical phones/tablets, Safari, Firefox, screen-reader interaction, slow real mobile hardware, real wallet extensions and actual Sepolia RPC/FHE transactions. No live blockchain test or deployment was attempted. Automated axe checks are not a full accessibility certification. The production JS bundle is approximately 489 kB before gzip / 155 kB gzip; CSS is approximately 47 kB / 10 kB gzip.
 
 Reproduce browser tests with locally installed Google Chrome, or change the Playwright `channel` for an available browser. The config reuses a running Vite server or starts one. Screenshots are regenerated by the browser tests. Generated traces and external design-review captures are ignored by Git, ESLint and Prettier.
 

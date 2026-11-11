@@ -45,7 +45,7 @@ for (const width of [320, 375, 390, 428, 768, 1024, 1440]) {
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'Great minds.',
+      'Play trivia.',
     );
     await expect(
       page.getByText(
@@ -63,7 +63,7 @@ for (const width of [320, 375, 390, 428, 768, 1024, 1440]) {
         page.getByRole('button', { name: 'Open navigation menu' }),
       ).toBeFocused();
     }
-    await page.getByRole('link', { name: 'Play now', exact: true }).click();
+    await page.getByRole('link', { name: 'Play Now', exact: true }).click();
     await expect(page).toHaveURL(/dashboard/);
     await noOverflow(page);
     await screenshot(page, 'dashboard', width);

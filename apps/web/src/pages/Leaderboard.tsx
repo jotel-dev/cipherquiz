@@ -145,7 +145,7 @@ export function Leaderboard() {
           </Link>
         </Button>
       </div>
-      <Link to="/#privacy" className="text-link small">
+      <Link to="/how-it-works#confidentiality" className="text-link small">
         How we think about private scores <ArrowUpRight size={14} />
       </Link>
     </div>

@@ -1,17 +1,19 @@
-// The approved geometric C / question mark / shield artwork is not in the repo.
-// Supply its asset URL here when provided. Do not substitute an invented mark.
+// Original, owner-supplied artwork. Keep the geometric C, question mark,
+// shield/lock and wordmark together; no CSS or text replacement is rendered.
 export function Logo({
-  assetUrl = import.meta.env.VITE_APPROVED_LOGO_URL || undefined,
+  assetUrl = import.meta.env.VITE_APPROVED_LOGO_URL ||
+    '/brand/cipherquiz-approved.png',
 }: {
   assetUrl?: string;
 }) {
   return (
-    <span className="brand">
-      {assetUrl && <img src={assetUrl} width="32" height="32" alt="" />}Cipher
-      <span>Quiz</span>
-      <span className="brand-period" aria-hidden="true">
-        .
-      </span>
-    </span>
+    <img
+      className="brand-image"
+      src={assetUrl}
+      width="2172"
+      height="724"
+      alt="CipherQuiz"
+      decoding="async"
+    />
   );
 }

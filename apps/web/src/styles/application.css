@@ -337,7 +337,7 @@
 }
 .selection-bottom strong {
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
 }
 .selection-bottom small {
   font-size: 10px;
@@ -464,7 +464,7 @@
   letter-spacing: 0.06em;
 }
 .quiz-progress-heading > span:first-child {
-  font-weight: 750;
+  font-weight: 700;
 }
 .quiz-progress-heading > span:last-child {
   color: var(--muted);
@@ -880,7 +880,7 @@
 }
 .table-heading {
   font-size: 8px;
-  font-weight: 750;
+  font-weight: 700;
   color: var(--muted);
   letter-spacing: 0.08em;
   padding-block: 15px;
@@ -920,7 +920,7 @@
 }
 .player-cell strong {
   font-size: 11px;
-  font-weight: 650;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .player-cell > div > span {
@@ -1002,7 +1002,7 @@
 }
 .profile-wallet strong {
   font-size: 11px;
-  font-weight: 650;
+  font-weight: 600;
 }
 .profile-wallet p {
   font-size: 9px;
@@ -1091,7 +1091,7 @@
 }
 .round-name > strong {
   font-size: 11px;
-  font-weight: 650;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .round-name > span {

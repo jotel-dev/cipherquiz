@@ -15,8 +15,8 @@
   --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   /* Typescale: 16px base, 1.25 major third. Smaller optical labels. */
-  --text-xs: 10px;
-  --text-sm: 13px;
+  --text-xs: 11px;
+  --text-sm: 14px;
   --text-base: 16px;
   --text-lg: 20px;
   --text-xl: 25px;

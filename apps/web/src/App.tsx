@@ -4,6 +4,7 @@ import { ArrowRight, RotateCcw } from 'lucide-react';
 import { GameProvider } from './game/context';
 import { Layout } from './components/Layout';
 import { Landing } from './pages/Landing';
+import { HowItWorks } from './pages/HowItWorks';
 import { Dashboard } from './pages/Dashboard';
 import { Categories } from './pages/Categories';
 import { Quiz } from './pages/Quiz';
@@ -46,6 +47,7 @@ export function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route index element={<Landing />} />
+              <Route path="how-it-works" element={<HowItWorks />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="categories" element={<Categories />} />
               <Route path="play" element={<Quiz />} />
