@@ -1,6 +1,6 @@
 # Planned confidential architecture
 
-Status: design proposal for later milestones. Phase 1 implements health checks and toolchain scaffolding only.
+Status: this document retains the longer-term design proposal. Phase 1 implements health checks and toolchain scaffolding. Phase 2 now implements a token-free local scoring subset; the [implemented architecture](encrypted-scoring.md) is authoritative for that contract, including its single-player rounds, batch deadline, encrypted context binding and final-score ACL. The settlement flows below remain unimplemented proposals.
 
 ## Components and data boundaries
 

@@ -1,4 +1,40 @@
-# Phase 1 verification and handoff
+# Verification record
+
+## Phase 2: encrypted scoring (2026-11-11)
+
+Environment: Windows PowerShell, Node.js 24.15.0, npm 11.12.1. Work started on `feat/encrypted-scoring` with a clean working tree at `adbe85c`. Fetched `origin`; HEAD and `origin/main` initially had zero divergent commits. All application sources, workspace manifests, the lockfile and installed Zama/plugin declarations were reviewed before implementation. No dependency versions or lockfile entries changed.
+
+The [Phase 2 architecture and security record](encrypted-scoring.md) describes the implemented workflow and links the official sources consulted. Contract tests use actual official FHEVM plugin input/decryption utilities with simulated local cryptography; they do not substitute an application plaintext scorer. Current application SDK API shapes and adapter configurations are checked separately at compile time. Current-SDK wire compatibility, live input proofs and real threshold-KMS ACL enforcement are unverified.
+
+| Requested command      | Final result                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| `npm run build`        | Pass: all five workspaces; external execution needed for Vite |
+| `npm run typecheck`    | Pass: all five workspaces                                     |
+| `npm run lint`         | Pass: ESLint and Solhint, zero warnings                       |
+| `npm run format`       | Pass: repository formatting applied                           |
+| `npm test`             | Pass: 17 tests, zero failures or skips                        |
+| `npm run check`        | Pass: build, typecheck, lint, format check and all tests      |
+| `npm audit --omit=dev` | Pass: zero vulnerabilities                                    |
+
+Initial test typechecking found strict TypeScript errors in signer indexing, enum narrowing and handle indexing; those were corrected. Initial Solhint warnings were resolved with NatSpec and naming fixes; narrow inline suppressions preserve direct deadline comparisons and valid modern constructor syntax. A subsequent test run failed five assertions because Hardhat omitted custom-error names after recompilation. Assertions now verify ABI revert selectors, and the full test suite passes.
+
+The sandboxed build failed because Vite/esbuild could not read a parent directory. The sandboxed production audit also failed to reach npm's advisory endpoint. Both were retried with external execution permission; no source changes or dependency overrides were used to bypass those environment failures. The audit retry returned zero vulnerabilities. No failed command was silently skipped.
+
+### Tests and preserved checks
+
+- Existing API tests: liveness without PostgreSQL, readiness success/error behavior without database error disclosure, invalid port rejection (3 passing).
+- Existing local chain smoke test (1 passing).
+- New scoring tests (13 passing): authorized immutable setup and invalid public configuration; correct, incorrect and mixed encrypted scores; invalid choices; duplicate/partial batches and unauthorized operations; malformed proofs, proof membership, sender/contract binding and rollback; handle replay across rounds; encrypted round/question context; exact expiry and timeout finalization; score ACL before/after finalization, key/answer denial and public-decryption denial; duplicate handles within a batch, replay-state rollback and late finalization; invalid encrypted operator keys and a complete ten-question circuit.
+- Stored key and score handles have persistent contract ACL permission; the score gains player permission only at finalization. Unauthorized decrypt requests fail with authorization-specific errors. No negative local ACL case is skipped. Live KMS denial is not tested.
+- Ten-question submission: approximately 1.422 million mock gas (observed 1,421,907–1,421,931 as ciphertext calldata changes), global HCU 4,840,352, maximum HCU depth 1,158,032, final decrypted score 10. These are local instrumentation results, not live latency or cost claims.
+
+Frontend/API implementation, responsive CSS, PostgreSQL readiness behavior, shared disclaimer and all existing scripts are unchanged. API readiness paths remain injection-tested; no live PostgreSQL server or browser wallet workflow was verified in this phase. No servers, deployment, wallet funding, secret material or financial functionality were introduced. `npm ci` remains the reproduction command; a new clean installation was not performed during this phase.
+
+### Remaining boundary
+
+Before testnet integration, run a separately authorized dummy-data current-SDK round trip against the supported network, including real proof rejection and unauthorized decryption denial. Review protocol/module versions, network resource limits, content integrity, timing/finality fairness, operator trust, question/score inference and metadata leakage before adding UI/API scoring. See the Phase 2 record for the smallest safe dependency strategy if incompatibility is found. No breaking dependency change is proposed without that evidence.
+
+## Phase 1 verification and handoff
 
 Verified on 2026-11-10 on Windows with Node.js 24.15.0 and npm 11.12.1. The project directory was initially empty, with no package manifest, source files, Git repository or applicable AGENTS.md found. No Quiza source was accessed or copied.
 

@@ -8,6 +8,12 @@ Confidential Web3 trivia, built independently for the Zama Developer Program Mai
 
 This repository provides a working React preview, Fastify health endpoints, PostgreSQL connection boundary, shared types, wallet configuration and a locally compilable FHEVM toolchain. There is no game engine, question bank content, staking, token transfer, SDK encryption/decryption integration or deployment.
 
+## Phase 2: local encrypted scoring
+
+A token-free scoring contract and local FHEVM tests now cover encrypted keys and answers, encrypted scores, immutable round setup, deadlines, replay prevention and player-only final score access. Run `npm test -w @cipherquiz/contracts`. The frontend remains the Phase 1 preview; no browser/API scoring integration or deployment is included.
+
+Keys are encrypted onchain, but their authoring operator knows their plaintext. Local FHEVM mocks do not establish live cryptographic confidentiality. See the [implemented contract architecture, SDK compatibility evidence and security limits](docs/encrypted-scoring.md), and the [verification record](docs/verification.md).
+
 Quiza is gameplay inspiration only. No Quiza source code was used.
 
 ## Intended game
@@ -96,6 +102,6 @@ The wallet provider is configured for Sepolia but has no transaction UI. No toke
 
 ## Next milestone
 
-Design and validate a local encrypted-scoring proof of concept with dummy data, a reviewed round state machine and explicit ACL tests. Prove that unauthorized users cannot decrypt keys, answers or scores; then benchmark ten-question execution and decide timing and anti-replay rules. Staking and ERC-7984 settlement follow only after those boundaries are tested.
+Validate the current application SDK against the contract on a supported FHEVM network with dummy data, including real proof rejection and unauthorized decryption denial. Review network latency, content integrity, timing fairness and metadata leakage before browser/API scoring integration. The local proof of concept and ten-question mock benchmark are complete; live cryptographic compatibility remains unverified. Staking and ERC-7984 settlement remain separate later work.
 
 See [verification](docs/verification.md) for completed checks and remaining integration limits.

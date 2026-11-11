@@ -1,5 +1,7 @@
 # Dependency decisions
 
+Phase 2 update (2026-11-11): no dependency or lockfile changes. The [encrypted-scoring record](encrypted-scoring.md#sdk-compatibility-boundary) distinguishes executed plugin/legacy-relayer local workflows from type-checked current-SDK APIs and unverified current-SDK wire compatibility. Current SDK generic encryption/decryption APIs exist; token-focused examples are not the only available surface.
+
 Reviewed on 2026-11-10 using official sources and npm registry metadata. Resolved package versions are recorded in package-lock.json; docs/verification.md records the installed versions.
 
 ## Zama sources consulted before selecting packages
