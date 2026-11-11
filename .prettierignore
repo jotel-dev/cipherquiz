@@ -5,3 +5,6 @@ contracts/artifacts
 contracts/cache
 contracts/fhevmTemp
 
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.design-research/

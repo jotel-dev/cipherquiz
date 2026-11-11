@@ -1,0 +1,46 @@
+:root {
+  color-scheme: light;
+  --background: #faf9f6;
+  --surface: #ffffff;
+  --text: #17151d;
+  --muted: #655e70;
+  --primary: #6d35e8;
+  --primary-hover: #5925cb;
+  --primary-soft: #f1eafa;
+  --border: #eae6f2;
+  --border-strong: #dbd5e4;
+  --subtle: #f0edf4;
+  --success: #557740;
+  --error: #a63e35;
+  --font-body: 'Manrope', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  /* Typescale: 16px base, 1.25 major third. Smaller optical labels. */
+  --text-xs: 10px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 25px;
+  --text-2xl: 31.25px;
+  --text-3xl: clamp(31.25px, 3.3vw, 43px);
+  --text-4xl: clamp(39px, 4.5vw, 54px);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --radius-sm: 4px;
+  --radius: 7px;
+  --radius-lg: 12px;
+  --shadow-soft: 0 2px 5px #21142e06;
+  --shadow-card: 0 10px 25px #21142e08;
+  --shadow-dialog: 0 24px 70px #21142e24;
+  --duration-fast: 150ms;
+  --duration: 230ms;
+  --duration-reveal: 520ms;
+  /* easings.net: easeOutCubic */
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+}
