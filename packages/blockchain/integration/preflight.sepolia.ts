@@ -15,6 +15,14 @@ import {
 import { sepolia } from 'viem/chains';
 import { sepolia as fheSepolia } from '@zama-fhe/sdk/chains';
 import { required } from './support.js';
+import {
+  AGGREGATE_CAP_WEI,
+  MAX_FEE_PER_GAS_WEI,
+  MAX_GAS_PER_TX,
+  REVIEWED_OPERATOR,
+  assertReviewedOperator,
+  readBudgetLedger,
+} from '../../../contracts/scripts/sepolia-policy.js';
 
 // Read-only by construction: no wallet, signer, private key, SDK instance or write API.
 // Approval flags are neither read nor set. RPC credentials are never printed.
@@ -23,6 +31,17 @@ async function main() {
   try {
     const rpc = required(process.env, 'SEPOLIA_RPC_URL');
     assert.equal(new URL(rpc).protocol, 'https:');
+    const operator = getAddress(
+      process.env.CIPHERQUIZ_OPERATOR_ADDRESS ?? REVIEWED_OPERATOR,
+    );
+    assertReviewedOperator(operator);
+    const feeValue =
+      process.env.CIPHERQUIZ_MAX_FEE_PER_GAS_WEI ??
+      MAX_FEE_PER_GAS_WEI.toString();
+    assert.match(feeValue, /^[1-9][0-9]*$/);
+    const feeCap = BigInt(feeValue);
+    assert.ok(feeCap <= MAX_FEE_PER_GAS_WEI, 'Reviewed fee ceiling exceeded');
+    const budget = readBudgetLedger();
     const client = createPublicClient({
       chain: sepolia,
       transport: http(rpc, { timeout: 30_000, retryCount: 0 }),
@@ -78,9 +97,6 @@ async function main() {
         'utf8',
       ),
     ) as { abi: Abi; bytecode: Hex };
-    const operator = process.env.CIPHERQUIZ_OPERATOR_ADDRESS
-      ? getAddress(process.env.CIPHERQUIZ_OPERATOR_ADDRESS)
-      : undefined;
     let deployment;
     if (operator) {
       stage = 'unsigned deployment estimate';
@@ -95,7 +111,16 @@ async function main() {
         data,
       });
       const gasLimit = (estimatedGas * 120n + 99n) / 100n;
+      assert.ok(gasLimit <= MAX_GAS_PER_TX, 'Deployment gas ceiling exceeded');
       const balance = await client.getBalance({ address: operator });
+      assert.ok(
+        (gasLimit + 3n * MAX_GAS_PER_TX) * feeCap <= budget.remainingWei,
+        'Deployment plus integration ceilings exceed remaining aggregate budget',
+      );
+      assert.ok(
+        fees.maxFeePerGas <= feeCap,
+        'Suggested fee exceeds planning cap',
+      );
       deployment = {
         operator,
         constructorArguments: [operator],
@@ -104,6 +129,12 @@ async function main() {
         gasLimit: gasLimit.toString(),
         estimatedCostEth: formatEther(estimatedGas * fees.maxFeePerGas),
         balanceEth: formatEther(balance),
+        planningFeeCapWei: feeCap.toString(),
+        maximumGasLiabilityEth: formatEther(gasLimit * feeCap),
+        deploymentPlusIntegrationCeilingEth: formatEther(
+          (gasLimit + 3n * MAX_GAS_PER_TX) * feeCap,
+        ),
+        sufficientBalanceAtPlanningCap: balance >= gasLimit * feeCap,
         sufficientBalanceAtSuggestedFee:
           balance >= gasLimit * fees.maxFeePerGas,
       };
@@ -124,11 +155,18 @@ async function main() {
           artifactCreationHash: keccak256(artifact.bytecode),
           suggestedMaxFeePerGasWei: fees.maxFeePerGas.toString(),
           suggestedPriorityFeeWei: fees.maxPriorityFeePerGas.toString(),
+          aggregateCapWei: AGGREGATE_CAP_WEI.toString(),
+          aggregateReservedWei: budget.reservedWei.toString(),
+          aggregateRemainingWei: budget.remainingWei.toString(),
+          maxGasPerTransaction: MAX_GAS_PER_TX.toString(),
+          integrationThreeWriteCeilingEth: formatEther(
+            3n * MAX_GAS_PER_TX * feeCap,
+          ),
           deployment:
             deployment ??
             'blocked: public CIPHERQUIZ_OPERATOR_ADDRESS unavailable',
           evidenceBoundary:
-            'Address/code checks and unsigned estimates only; encrypted proofs, FHE scoring and KMS not tested.',
+            'Read-only deployment estimate only. Integration gas remains provisional until a scoring contract exists. No signer configured/verified by this command; FHE and KMS not tested.',
         },
         null,
         2,

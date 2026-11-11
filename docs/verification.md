@@ -1,5 +1,36 @@
 # Verification record
 
+## Stage A update: supplied operator and aggregate budget (2026-11-11)
+
+The owner supplied public operator `0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7`, Ethereum Sepolia chain `11155111` and a strict **0.02 ETH aggregate spending cap** (`20000000000000000` wei). These replace the earlier unknown-address/illustrative-budget state below. This configuration is not deployment approval. Both execution flags remain unset; no Sepolia transaction was submitted.
+
+The [current report](sepolia-predeployment.md) and [secure local runbook](sepolia-integration.md) contain the exact constructor, future commands, environment variables and conditional approval checkpoint. Deployment/integration now pin the derived operator independently of environment changes. An offline signer command logs only the public address on success and suppresses signing errors. It currently fails closed because no signer is configured; actual signer ownership/matching is **not yet verified**.
+
+| Check                                                    | Result                                                                                                        |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `npm run check`                                          | Pass: all builds, typechecks, lint/format checks and **30 local tests**, no failures/skips                    |
+| Local suite totals                                       | 3 API, 4 existing frontend, 9 orchestration/policy, 14 Hardhat                                                |
+| Read-only operator-specific Sepolia preflight            | Pass at block `12112842`, timestamp `1794413724`; protocol address/code checks still pass                     |
+| Public operator balance                                  | **0 Sepolia ETH**; funding is required before deployment                                                      |
+| Unsigned Sepolia deployment estimate                     | 8839309 gas; 10607171 with 20% margin; no broadcast                                                           |
+| Proposed transaction ceilings                            | 0.1 gwei and 15000000 gas; maximum 0.0015 ETH per write                                                       |
+| Deployment gas liability at proposed ceiling             | 0.0010607171 ETH using the current estimate/margin                                                            |
+| Three integration writes                                 | Provisional mock estimates in the report; enforceable combined ceiling 0.0045 ETH, not a live gas measurement |
+| Deployment estimate plus integration ceiling             | 0.0055607171 ETH; below 0.02 ETH aggregate cap                                                                |
+| Four writes at absolute ceilings                         | At most 0.006 ETH; retries still consume the same aggregate ledger                                            |
+| Offline signer verification                              | Expected failure with no credentials; not counted as a successful signer match                                |
+| Production budget ledger                                 | No file/reservation created; 0 wei reserved, 0.02 ETH remaining                                               |
+| Frontend, Solidity sources, dependency versions/lockfile | Unchanged                                                                                                     |
+| Real scoring, KMS, live negative checks                  | Still unverified; remote KMS denial is not established by SDK preflight                                       |
+
+The shared ignored `contracts/.sepolia-budget.jsonl` reserves maximum gas liabilities before broadcasts, with an exclusive lock and fsync. Successful/failed/uncertain sends all retain their reservation across restarts and retries. Fee/gas ceilings and aggregate exhaustion stop further writes. Unit tests exercise public pinning, persistence across attempts, cap exhaustion without extra writes, stale locks, malformed/truncated journals and above-ceiling gas/fee requests. They use temporary journals, not the production ledger. Keep one canonical checkout; deleting records or bypassing the scripts would invalidate local accounting and requires stopping for reconciliation rather than silently resetting a cap.
+
+The existing four-question mock test reports create/submit/finalize gas for provisional planning; no scoring assertion was removed. Its first measured snapshot was 596872 / 649183 / 69493 gas. Final full-check values were 596860 / 649135 / 69493 as randomized encrypted calldata changed. These are not substituted for live protocol costs: notably the public-address deployment RPC estimate is materially higher than the earlier local estimate. Exact integration estimation remains blocked on an approved scoring deployment and real encrypted inputs, so the report provides an enforced ceiling separately from provisional mock costs.
+
+The full check used the established external execution permission for Vite's parent-directory restriction. Read-only RPC also used external execution permission. No signer, private RPC credential, approval flag, production budget reservation, transaction, staking or payout was introduced. The earlier unchanged-lockfile production advisory check remains zero known production findings; it was not rerun because this update changed no dependencies. Final formatting and diff checks passed.
+
+Remaining: secure local RPC/signer setup, offline verification of the exact operator, funding, a separate player signer, refreshed unsigned estimates and **explicit deployment approval**. Integration writes require separately authorized scope. No transaction-capable script was executed in this update. The records below retain earlier historical evidence.
+
 ## Stage A: Sepolia predeployment review (2026-11-11)
 
 Implementation checkpoint `accb8f671466a5ab7a224c9af19e97f3214f35d6` was committed and pushed on `feat/sepolia-fhe-verification`; `git ls-remote` returned the identical remote hash. The branch starts from frontend commit `8ccbcb9`, preserves the existing scoring/frontend work and all pending Sepolia preparation, and changes no Solidity or frontend sources. No main-branch commit, merge, force-push, deployment or other Sepolia transaction occurred.

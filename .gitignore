@@ -11,6 +11,7 @@ contracts/artifacts/
 contracts/cache/
 contracts/types/
 contracts/fhevmTemp/
+contracts/.sepolia-budget.jsonl*
 .DS_Store
 .vscode/
 

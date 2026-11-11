@@ -24,6 +24,12 @@ import { createConfig } from '@zama-fhe/sdk/viem';
 import { node } from '@zama-fhe/sdk/node';
 import { sepolia as fheSepolia } from '@zama-fhe/sdk/chains';
 import {
+  MAX_GAS_PER_TX,
+  assertReviewedOperator,
+  readBudgetLedger,
+  reserveGasBudget,
+} from '../../../contracts/scripts/sepolia-policy.js';
+import {
   isAclDenial,
   maskImmutables,
   packAnswer,
@@ -55,7 +61,13 @@ test(
     const sdks: ZamaSDK[] = [];
     try {
       const settings = readSettings(process.env);
+      assert.ok(
+        3n * MAX_GAS_PER_TX * settings.maxFeePerGas <=
+          readBudgetLedger().remainingWei,
+        'Insufficient aggregate headroom for complete three-write integration',
+      );
       const operator = privateKeyToAccount(settings.operatorKey);
+      assertReviewedOperator(operator.address);
       const player = privateKeyToAccount(settings.playerKey);
       const stranger = privateKeyToAccount(generatePrivateKey());
       assert.notEqual(
@@ -253,6 +265,19 @@ test(
           'Signer needs Sepolia ETH',
         );
         t.signal.throwIfAborted();
+        const reservation = reserveGasBudget(
+          functionName,
+          gas,
+          settings.maxFeePerGas,
+        );
+        t.diagnostic(
+          JSON.stringify({
+            operation: functionName,
+            budgetReservationId: reservation.id,
+            reservedWei: reservation.reservedWei.toString(),
+            aggregateRemainingWei: reservation.remainingWei.toString(),
+          }),
+        );
         const hash = await who.wallet.writeContract({
           ...data,
           gas,

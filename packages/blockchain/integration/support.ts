@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import { getAddress, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import {
+  AGGREGATE_CAP_WEI,
+  MAX_FEE_PER_GAS_WEI,
+  assertReviewedOperator,
+} from '../../../contracts/scripts/sepolia-policy.js';
 
 export function required(env: NodeJS.ProcessEnv, name: string): string {
   const value = env[name];
@@ -34,19 +39,30 @@ export function readSettings(env: NodeJS.ProcessEnv) {
   }
   const operatorKey = key('CIPHERQUIZ_OPERATOR_PRIVATE_KEY');
   const playerKey = key('CIPHERQUIZ_PLAYER_PRIVATE_KEY');
+  assertReviewedOperator(required(env, 'CIPHERQUIZ_OPERATOR_ADDRESS'));
   // Validate scalar range and role separation before any network requests.
   assert.notEqual(
     privateKeyToAccount(operatorKey).address,
     privateKeyToAccount(playerKey).address,
     'Operator and player must differ',
   );
+  const totalGasBudget = positive('CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI');
+  const maxFeePerGas = positive('CIPHERQUIZ_MAX_FEE_PER_GAS_WEI');
+  assert.ok(
+    maxFeePerGas <= MAX_FEE_PER_GAS_WEI,
+    'Reviewed fee ceiling exceeded',
+  );
+  assert.ok(
+    totalGasBudget <= AGGREGATE_CAP_WEI,
+    'Invocation budget exceeds aggregate cap',
+  );
   return {
     rpc,
     address,
     operatorKey,
     playerKey,
-    maxFeePerGas: positive('CIPHERQUIZ_MAX_FEE_PER_GAS_WEI'),
-    totalGasBudget: positive('CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI'),
+    maxFeePerGas,
+    totalGasBudget,
   };
 }
 

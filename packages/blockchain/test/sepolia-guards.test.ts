@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { generatePrivateKey } from 'viem/accounts';
+import { REVIEWED_OPERATOR } from '../../../contracts/scripts/sepolia-policy.js';
 import {
   isAclDenial,
   maskImmutables,
@@ -40,13 +41,14 @@ test('live settings isolate signer roles and require explicit positive fee budge
     SEPOLIA_RPC_URL: 'https://example.invalid',
     CIPHERQUIZ_SEPOLIA_ADDRESS: '0x0000000000000000000000000000000000000001',
     CIPHERQUIZ_OPERATOR_PRIVATE_KEY: operatorKey,
+    CIPHERQUIZ_OPERATOR_ADDRESS: REVIEWED_OPERATOR,
     CIPHERQUIZ_PLAYER_PRIVATE_KEY: operatorKey,
-    CIPHERQUIZ_MAX_FEE_PER_GAS_WEI: '1000000000',
+    CIPHERQUIZ_MAX_FEE_PER_GAS_WEI: '100000000',
     CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI: '7000000000000000',
   };
   assert.throws(() => readSettings(env), /Operator and player must differ/);
   env.CIPHERQUIZ_PLAYER_PRIVATE_KEY = generatePrivateKey();
-  assert.equal(readSettings(env).maxFeePerGas, 1_000_000_000n);
+  assert.equal(readSettings(env).maxFeePerGas, 100_000_000n);
   for (const name of [
     'CIPHERQUIZ_MAX_FEE_PER_GAS_WEI',
     'CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI',
@@ -55,6 +57,23 @@ test('live settings isolate signer roles and require explicit positive fee budge
       assert.throws(() => readSettings({ ...env, [name]: value }));
     }
   }
+  assert.throws(
+    () =>
+      readSettings({
+        ...env,
+        CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI: '20000000000000001',
+      }),
+    /aggregate cap/,
+  );
+  assert.throws(
+    () =>
+      readSettings({
+        ...env,
+        CIPHERQUIZ_OPERATOR_ADDRESS:
+          '0x0000000000000000000000000000000000000001',
+      }),
+    /reviewed public address/,
+  );
   assert.throws(() =>
     readSettings({
       ...env,

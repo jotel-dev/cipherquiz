@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
 import { ethers, network } from 'hardhat';
+import {
+  AGGREGATE_CAP_WEI,
+  MAX_FEE_PER_GAS_WEI,
+  MAX_GAS_PER_TX,
+  assertReviewedOperator,
+  readBudgetLedger,
+  reserveGasBudget,
+} from './sepolia-policy';
 
 // Prepared only. Set the approval flag solely after explicit owner authorization.
 // No default key, mnemonic, public RPC, or local deployment fallback.
@@ -23,7 +31,18 @@ async function main() {
     assert.ok(budgetValue && /^[1-9][0-9]*$/.test(budgetValue));
     assert.ok(feeValue && /^[1-9][0-9]*$/.test(feeValue));
     const budget = BigInt(budgetValue);
+    assert.ok(
+      budget <= AGGREGATE_CAP_WEI,
+      'Invocation budget exceeds aggregate cap',
+    );
     const maxFeePerGas = BigInt(feeValue);
+    assert.ok(
+      maxFeePerGas <= MAX_FEE_PER_GAS_WEI,
+      'Reviewed fee ceiling exceeded',
+    );
+    const signer = new ethers.Wallet(key, ethers.provider);
+    assertReviewedOperator(signer.address);
+    assertReviewedOperator(process.env.CIPHERQUIZ_OPERATOR_ADDRESS ?? '');
     stage = 'Sepolia and FHEVM infrastructure preflight';
     assert.equal((await ethers.provider.getNetwork()).chainId, 11155111n);
     // These addresses are pinned by the installed Solidity 0.11.1 configuration.
@@ -34,7 +53,6 @@ async function main() {
       '0xbE0E383937d564D7FF0BC3b46c51f0bF8d5C311A',
     ])
       assert.notEqual(await ethers.provider.getCode(address), '0x');
-    const signer = new ethers.Wallet(key, ethers.provider);
     assert.equal(
       signer.address,
       ethers.getAddress(process.env.CIPHERQUIZ_OPERATOR_ADDRESS ?? ''),
@@ -63,6 +81,12 @@ async function main() {
       from: signer.address,
     });
     const gasLimit = (estimatedGas * 120n + 99n) / 100n;
+    assert.ok(gasLimit <= MAX_GAS_PER_TX, 'Transaction gas ceiling exceeded');
+    assert.ok(
+      (gasLimit + 3n * MAX_GAS_PER_TX) * maxFeePerGas <=
+        readBudgetLedger().remainingWei,
+      'Deployment plus integration ceilings exceed remaining aggregate budget',
+    );
     const fees = await ethers.provider.getFeeData();
     assert.ok(fees.maxFeePerGas && fees.maxPriorityFeePerGas);
     assert.ok(fees.maxFeePerGas <= maxFeePerGas, 'Fee cap exceeded');
@@ -76,6 +100,14 @@ async function main() {
         gasLimit * maxFeePerGas,
     );
     stage = 'approved deployment broadcast';
+    const reservation = reserveGasBudget('deployment', gasLimit, maxFeePerGas);
+    console.info(
+      JSON.stringify({
+        budgetReservationId: reservation.id,
+        reservedWei: reservation.reservedWei.toString(),
+        aggregateRemainingWei: reservation.remainingWei.toString(),
+      }),
+    );
     const started = Date.now();
     const contract = await factory.deploy(signer.address, {
       gasLimit,

@@ -1,6 +1,6 @@
 # CipherQuizScoring Stage A predeployment report
 
-Date: 2026-11-11 (Africa/Lagos). **STOP: no Sepolia deployment or other transaction is authorized or submitted.** Local checks and read-only Sepolia configuration checks are complete. A signer-specific approval package remains blocked on the public operator address and budget selection. This report does not claim real encrypted scoring or KMS verification.
+Date: 2026-11-11 (Africa/Lagos). **STOP: Stage A only; no deployment or other Sepolia transaction is authorized or submitted.** The owner supplied operator `0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7` and a strict aggregate cap of **0.02 Sepolia ETH** (`20000000000000000` wei). The earlier placeholder and 0.01 ETH proposal are superseded. The current signer-specific unsigned estimate is recorded below. Signer/RPC credentials remain unconfigured; the operator has zero ETH in the observed snapshot. This report does not claim real encrypted scoring or KMS verification.
 
 ## Repository and preserved work
 
@@ -36,7 +36,7 @@ Installed transitive `@fhevm/sdk 0.13.2` performs `checkPersistAllowed` before s
 
 Ran the new `npm run preflight:sepolia -w @cipherquiz/blockchain` using the public RPC in the installed Zama Sepolia preset, explicitly supplied for this read-only invocation. It creates no wallet, reads no signing key, sets no approval flag and calls no write API.
 
-Observed block `12112749`, timestamp `1794412596`, chain ID `11155111`. Installed protocol ID is `10001` (distinct from the Ethereum chain ID).
+Refreshed for the supplied operator at block `12112842`, timestamp `1794413724`, chain ID `11155111`. Installed protocol ID is `10001` (distinct from the Ethereum chain ID). This invocation used only public configuration and Zama's SDK-preset public RPC; it did not configure persistent RPC credentials or a signer. The aggregate ledger remains absent/unspent, with 0 wei reserved and 0.02 ETH available.
 
 | Component                        | Address                                      |
 | -------------------------------- | -------------------------------------------- |
@@ -55,46 +55,70 @@ No `CIPHERQUIZ_*`, `SEPOLIA_*` or `ZAMA_*` environment variables were present at
 
 Reviewed application calldata contains encrypted handles/proofs, not plaintext keys/answers. Events contain round/player metadata only. The fixture uses four random disposable keys in memory; content commitments omit keys. The operator constructor argument is public and contains no answer bank. No private bank, plaintext SDK-event logging, permit/signature logging or secret-bearing deployment artifact is introduced. Build artifacts/cache and populated `.env` files are ignored; examples remain empty. Public frontend practice fixtures are separate from the encrypted test fixture. Solidity `private` storage is not a secrecy boundary; ciphertext confidentiality still depends on the real protocol and ACL.
 
-## Proposed deployment and costs
+## Deployment parameters and strict aggregate cap
 
-**Not executable until signer setup, budget selection and explicit approval.** From the repository root, with secrets injected securely and approval flag set only after authorization:
+The supplied public operator address has valid EIP-55 casing. Both deployment and integration independently pin their actual operator signer to **0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7**, before network access. Changing only an environment address cannot authorize a different signer. The offline signer command cannot verify a match until the owner securely configures a signer locally; its current invocation correctly failed closed with a sanitized message.
 
-```sh
-npm run deploy:sepolia -w @cipherquiz/contracts
-```
+| Parameter                  | Current configuration                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------ |
+| Network                    | Ethereum Sepolia, chain ID 11155111 only                                                         |
+| Operator/deployer          | 0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7                                                       |
+| Contract                   | contracts/src/CipherQuizScoring.sol:CipherQuizScoring                                            |
+| Constructor                | authorizedOperator = 0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7                                  |
+| Transaction value          | 0 wei; no stake, payout, token transfer or automatic funding                                     |
+| Strict aggregate cap       | 0.02 ETH = 20000000000000000 wei, across deployment, integration and retries                     |
+| Proposed fee ceiling       | 0.1 gwei = 100000000 wei/gas; enforced maximum, not a fee prediction                             |
+| Gas limit                  | ceil(current estimate ? 1.20), with an enforced maximum of 15000000 per transaction              |
+| Per-invocation allocations | Proposed: deployment 0.002 ETH; integration 0.005 ETH; both also consume the shared 0.02 ETH cap |
+| Confirmations              | Two, with a 180-second wait and no automatic write retry                                         |
+| Approval status            | Not granted; both execution flags remain unset                                                   |
 
-On Windows PowerShell use `npm.cmd` in place of `npm`. Do not put keys or credential-bearing RPC URLs in command arguments/history. The [runbook](sepolia-integration.md) lists all environment variables and the separate integration command.
+Exact future deployment command, from the repository root with secure environment injection, **only after explicit approval**:
 
-| Parameter                           | Proposed value/status                                                                           |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Network                             | Ethereum Sepolia only, chain ID `11155111`                                                      |
-| Contract                            | `contracts/src/CipherQuizScoring.sol:CipherQuizScoring`                                         |
-| Signer public address               | **Unavailable; owner must provide/select the real dedicated account. No address was invented.** |
-| Constructor                         | `authorizedOperator = CIPHERQUIZ_OPERATOR_ADDRESS = derived deployment signer`                  |
-| Transaction value                   | `0` wei; only Sepolia gas fees                                                                  |
-| Gas limit                           | `ceil(estimatedGas × 1.20)`, freshly estimated before broadcast                                 |
-| Confirmations/timeout               | Two confirmations; 180 seconds; no automatic write retry                                        |
-| Example fee cap                     | **Proposed, unapproved:** `1,000,000,000` wei/gas (1 gwei)                                      |
-| Example deployment budget           | **Proposed, unapproved:** `3,000,000,000,000,000` wei (0.003 Sepolia ETH)                       |
-| Example separate integration budget | **Proposed, unapproved:** `7,000,000,000,000,000` wei (0.007 Sepolia ETH)                       |
+    npm run deploy:sepolia -w @cipherquiz/contracts
 
-An unsigned estimate on isolated local Hardhat chain `31337` returned **1,545,261 gas**, or **1,854,314** with the margin. At the example 1 gwei cap, deployment would reserve approximately **0.001854314 Sepolia ETH**, subject to the real signer-specific Sepolia estimate. This is a local planning estimate, not a measured network receipt. The read-only network snapshot suggested maximum/priority fees of 70/50 wei per gas; this volatile observation is not an approved cap or future fee quote.
+Use npm.cmd on Windows if PowerShell blocks npm.ps1. No secret value belongs in command arguments or history. The [runbook](sepolia-integration.md) documents all variables, secure setup and separate integration authorization.
 
-The example total envelope is 0.01 Sepolia ETH across deployment plus three integration writes; it is a proposed safety ceiling, not a claim that all runs will fit. Example account funding split: operator 0.007 and player 0.003 Sepolia ETH; stranger zero. Funding is not performed by these scripts. Actual balances, per-operation network gas estimates, service availability and sufficient funding remain unverified until real public signer details are supplied. Deployment and integration each use `CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI` as their **own invocation's allocation**, so set 0.003 and 0.007 respectively if that proposal is approved. A fresh run/retry requires reviewing previous hashes and remaining aggregate approval budget.
+## Deployment and integration cost planning
 
-Both scripts stop if estimated gas with the margin exceeds their allocation, fee suggestions exceed the cap, priority fee exceeds the cap, or signer balance is inadequate. Actual mined fees may be lower than the reserved maximum. No staking, payout, token transfer, automatic funding or production-network transaction is included.
+Read-only Sepolia eth_estimateGas for this operator and the reviewed creation bytecode returned **8839309 gas**; the script's 20% margin gives **10607171 gas**. At the proposed 0.1 gwei ceiling, maximum deployment gas liability is **0.0010607171 ETH**. The observed operator balance is **0 ETH**, so deployment is blocked on funding. The RPC snapshot suggested max/priority fees of 71/50 wei per gas; the corresponding deployment estimate is 0.000000000627590939 ETH. These are volatile provider suggestions, not approved or guaranteed future prices. Costs are denominated in Sepolia test ETH, with no fiat-cost claim.
+
+The earlier local unsigned estimate of 1545261 gas is materially lower and must not substitute for this network estimate. The creation bytecode hash is unchanged. No transaction receipt exists.
+
+The existing four-question local mock test now reports gas for planning without changing its security assertions:
+
+| Integration action | Local mock gas | With 20% margin | Illustrative ETH at 0.1 gwei |
+| ------------------ | -------------: | --------------: | ---------------------------: |
+| createRound        |         596872 |          716247 |                 0.0000716247 |
+| submitAnswers      |         649183 |          779020 |                 0.0000779020 |
+| finalizeRound      |          69493 |           83392 |                 0.0000083392 |
+| Total              |        1315548 |         1578659 |                 0.0001578659 |
+
+These are **provisional local integration estimates**, not measured Sepolia costs. Ciphertext calldata can change gas slightly. Exact live integration estimates are blocked until an approved deployment exists and real SDK ciphertext/proof inputs are available. We do not fabricate a deployed address or submit transactions to obtain an estimate.
+
+A separate enforceable planning bound resolves aggregate headroom without assuming mock/network parity: each integration write is limited to 15000000 gas and 0.1 gwei, so its maximum permitted fee is 0.0015 ETH. All three integration writes together are bounded by **0.0045 ETH**. Current deployment estimate plus margin and this integration ceiling total **0.0055607171 ETH**. Even if all four permitted transactions hit the absolute gas/fee ceilings, they total at most **0.006 ETH**. These figures are bounds under the proposed limits, not estimates of what the entire test will cost and not permission to spend. The owner's **0.02 ETH remains the strict aggregate cap**, including subsequent attempts.
+
+Before deployment the script checks that deployment plus all three integration ceilings fit the remaining aggregate allowance. Before integration, the runner checks three-write headroom; every individual write is still simulated and estimated afresh. Any over-ceiling estimate, excessive suggested fee, insufficient balance or exhausted budget stops execution. The scripts do not raise limits to make a failing operation fit.
+
+## Persistent aggregate accounting
+
+Both write commands share contracts/.sepolia-budget.jsonl, bound to chain 11155111 and the reviewed operator. Before any wallet broadcast they acquire an exclusive lock, re-read the ledger, reserve gasLimit ? maxFeePerGas, append and fsync the reservation, then release the lock. The total of all reservations cannot exceed 20000000000000000 wei. Budget persists across deployment, integration, process restarts and retries. Per-invocation limits add a tighter bound; they do not reset aggregate capacity.
+
+Maximum liability remains reserved even when signing, broadcasting, waiting or a receipt fails. Confirmed cheaper receipts do not automatically release the difference. This intentionally stops sooner than actual spending might require. A crash lock, malformed/truncated ledger or exceeded cap blocks further reservations. No record is reset or silently repaired. Only public reservation IDs/amounts are logged; no secret or proof is stored. Stage A creates no production ledger or reservation.
+
+Use this single canonical checkout and retain the ignored ledger and its lock across runs. Do not delete/edit it, run from a second fresh clone, or manually broadcast outside the controlled scripts. Local accounting cannot constrain unrelated wallet activity or deliberate ledger deletion. Any such transaction/replacement would require a new budget reconciliation and explicit authorization first. No ETH-valued service/funding transaction is authorized or performed in Stage A; if later required, include its liability in the same aggregate budget before execution.
 
 ## Stage B approval checkpoint
 
-Required inputs: real public operator address; separate securely provisioned player signer; trusted HTTPS RPC; funded test accounts; selected fee cap and separate deployment/integration allocations. Public-address preflight must then supply the actual signer-specific unsigned Sepolia estimate and balance before requesting approval for that concrete deployment.
+Public operator and aggregate cap are now supplied. Remaining prerequisites: secure local signer matching the exact operator, trusted HTTPS RPC, a separate player signer, funding, current unsigned estimates and explicit owner approval. The offline signer check and both write commands enforce the pinned address. No actual private signer match has been established yet.
 
-**Do not set either approval flag or execute either transaction-capable command now.** After the missing public details are available, request explicit owner approval covering the named signer, reviewed artifact, constructor, chain and budget. Deployment-only approval does not authorize the three integration transactions; obtain that scope explicitly too.
+**Do not set either approval flag now.** Request approval for deploying only CipherQuizScoring with the address, constructor, artifact, network, proposed transaction ceilings and strict aggregate cap above, conditional on the remaining local/funding checks passing. Deployment-only approval does not authorize the three integration writes; request that scope separately. No onchain transaction has been sent.
 
-Stage B must retain deployment/test hashes, block numbers, gas/cost and timings, verify real proofs/scoring and uncached player decryption, and report unsupported remote-negative KMS verification accurately. Local and read-only checks cannot establish these outcomes. The runner's outsider/operator denials remain SDK checks unless independent remote evidence is obtained.
+Real input proofs, live scoring and uncached authorized player KMS decryption remain unverified. Outsider/operator SDK denial is not independent remote KMS denial; that evidence gap remains explicit. Stage B must record actual hashes, block numbers, receipt gas/fees and timings, and stop when either the remaining aggregate allowance or transaction limits are inadequate.
 
 ## Verification results
 
-`npm run check` passed after the code changes: all five builds and workspace typechecks, ESLint/Solhint, formatting and **26 local tests** (3 API, 4 existing frontend, 5 orchestration guards, 14 Hardhat). No failures or skips. Hardhat tests use mock encryption and do not exercise real KMS. The new role/budget guard test uses disposable in-memory signers and checks identical roles, invalid scalars and absent/invalid fee allocations before network access.
+`npm run check` passed after the operator/budget update: all five builds and workspace typechecks, ESLint/Solhint, formatting and **30 local tests** (3 API, 4 existing frontend, 9 orchestration/policy guards, 14 Hardhat). No failures or skips. New tests cover the pinned public address, durable cumulative reservations across attempts, exact cap exhaustion, damaged/locked journals and immutable fee/gas ceilings. Signer-role tests use disposable in-memory signers; none tests possession of the owner's private key. Hardhat tests use mock encryption and do not exercise real KMS. Existing scoring assertions remain intact; only gas reporting was added to their helper/mixed-score case.
 
 Read-only Sepolia preflight passed as recorded above. The unsigned local gas estimate submitted no transaction, including on the local chain. `npm audit --omit=dev` returned zero known production vulnerabilities. `git diff --check` passed. No fresh `npm ci` reproduction was attempted. The first sandboxed `npm run check` stopped at the known Vite/esbuild parent-directory restriction; the authorized external run passed. The first sandboxed RPC/advisory requests were blocked; authorized external retries passed. A formatter invocation explicitly including `.env.example` failed because it has no parser; supported source/document files were then formatted and the full formatting check passed. No `.env` contents were rewritten.
 

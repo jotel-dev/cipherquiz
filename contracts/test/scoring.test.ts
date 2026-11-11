@@ -13,6 +13,7 @@ describe('encrypted scoring (official FHEVM local environment)', function () {
   let stranger: Signer;
   let address: string;
   let deadline: number;
+  let mockGas: Record<string, string>;
   const contentHash = ethers.id('dummy public question set v1');
 
   // Hardhat can omit custom-error names from messages after recompilation.
@@ -35,7 +36,9 @@ describe('encrypted scoring (official FHEVM local environment)', function () {
 
   async function send(signer: Signer, method: string, ...args: unknown[]) {
     const tx = await contract.connect(signer).getFunction(method)(...args);
-    return tx.wait();
+    const receipt = await tx.wait();
+    if (receipt) mockGas[method] = receipt.gasUsed.toString();
+    return receipt;
   }
 
   async function open(keys = [0n, 1n, 2n, 3n], who = player) {
@@ -101,6 +104,9 @@ describe('encrypted scoring (official FHEVM local environment)', function () {
       await ethers.getContractFactory('CipherQuizScoring')
     ).deploy(operator.address);
     await contract.waitForDeployment();
+    const deployment = await contract.deploymentTransaction()!.wait();
+    assert.ok(deployment);
+    mockGas = { deployment: deployment.gasUsed.toString() };
     address = await contract.getAddress();
     deadline = (await ethers.provider.getBlock('latest'))!.timestamp + 3600;
   });
@@ -169,6 +175,8 @@ describe('encrypted scoring (official FHEVM local environment)', function () {
       await send(player, 'finalizeRound', id);
       assert.equal(await decrypt(id), expected);
       assert.equal((await round(id)).state, 3n);
+      if (name === 'multiple contributions')
+        console.info('Four-question mock gas planning only:', mockGas);
     });
   }
 

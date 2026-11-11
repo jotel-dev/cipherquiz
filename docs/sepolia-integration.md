@@ -4,13 +4,13 @@ Initial preparation started on `feat/encrypted-scoring` at `1ba8282`. Stage A re
 
 ## Review of the existing implementation
 
-The scoring contract, its thirteen local scoring tests and the compile-only SDK compatibility assertions were inspected before changes. Contract source and existing tests are unchanged. The circuit uses encrypted comparisons, key validity masking, encrypted boolean conversion and encrypted addition. Stored keys and scores retain contract ACL permissions; only final scores gain the player's permission. Immutable setup, caller checks, handle consumption and round/question context remain in force.
+The scoring contract, its thirteen local scoring tests and the compile-only SDK compatibility assertions were inspected before changes. Contract source and existing security assertions are unchanged; the mixed-score test now also reports mock gas for cost planning. The circuit uses encrypted comparisons, key validity masking, encrypted boolean conversion and encrypted addition. Stored keys and scores retain contract ACL permissions; only final scores gain the player's permission. Immutable setup, caller checks, handle consumption and round/question context remain in force.
 
 No new cryptographic assurance follows from this review. Authoring operators know plaintext keys. Deadlines depend on inclusion and block timestamps; operator-supplied content and keys are not independently validated. Question reuse, score inference and public participation metadata remain risks. The earlier [architecture and limitations](encrypted-scoring.md) continue to apply. Confidential staking is blocked on real network evidence and separate economic/security design.
 
 ## Prepared commands and boundaries
 
-- `npm run preflight:sepolia -w @cipherquiz/blockchain`: read-only chain/infrastructure checks and optional unsigned deployment estimate using public `CIPHERQUIZ_OPERATOR_ADDRESS`. Requires HTTPS RPC and compiled artifacts; reads no private keys or approval flags and has no wallet/write path. Stage A may run this command without deployment authorization.
+- `npm run preflight:sepolia -w @cipherquiz/blockchain`: read-only chain/infrastructure checks, aggregate headroom and unsigned deployment estimate using the pinned public `CIPHERQUIZ_OPERATOR_ADDRESS`. Requires HTTPS RPC and compiled artifacts; reads no private keys or approval flags and has no wallet/write path. Stage A may run this command without deployment authorization.
 - `contracts/scripts/deploy-sepolia.ts`: separate, approval-gated Hardhat deployment. Fixes the operator to the environment signer, checks Sepolia and installed infrastructure addresses, estimates deployment gas, enforces fee/balance limits and reports only public deployment metadata. The script was not executed.
 - `packages/blockchain/integration/scoring.sepolia.ts`: explicit current-SDK live test against an **existing** deployment. It contains no deployment path, Hardhat mock import, cleartext relayer or plaintext scoring substitute.
 - `packages/blockchain/integration/support.ts` and its local tests: fail-closed configuration, strict packed-input bounds, specific ACL error classification and compiler-declared immutable masking for runtime identity comparison.
@@ -34,9 +34,9 @@ These commands are a runbook, not authorization to execute them. Neither existin
 
 ## Secure environment setup
 
-Use fresh, dedicated **Sepolia-only** operator and player accounts, with different addresses and limited test ETH. Do not reuse production wallets. Inject environment values from a local secret manager into the process. Never paste keys into chat, terminal commands/history, CI output, committed files, `VITE_*`, public configuration or screenshots. RPC URLs can contain credentials and must also be treated as secrets.
+Use the supplied operator `0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7` and a different dedicated Sepolia player account, with limited test ETH. Both write commands independently check the actual operator signer against this pinned public address before network access. Inject environment values from a local secret manager into the process. Never paste keys into chat, terminal commands/history, CI output, committed files, `VITE_*`, public configuration or screenshots. RPC URLs can contain credentials and must also be treated as secrets.
 
-For local file-based configuration, the supplied `.env.example` files contain empty values only. A populated `.env` is ignored by Git but remains plaintext on disk: restrict it to the current OS user, keep it out of synced/shared directories, and remove it after use. Scripts intentionally do not auto-load files. If using an ignored file instead of injected environment values, Node 24's `--env-file` can load it explicitly (commands below run from the repository root):
+For local file-based configuration, the supplied `.env.example` files contain the public operator address and leave secret values empty. A populated `.env` is ignored by Git but remains plaintext on disk: restrict it to the current OS user, keep it out of synced/shared directories, and remove it after use. Scripts intentionally do not auto-load files. If using an ignored file instead of injected environment values, Node 24's `--env-file` can load it explicitly (commands below run from the repository root):
 
 ```sh
 # Only after approval; the selected file supplies the required variables.
@@ -49,18 +49,42 @@ Prefer the npm commands above with a secret-manager-injected environment. Do not
 | Variable                            | Deployment            | Integration test      | Meaning                                                                                    |
 | ----------------------------------- | --------------------- | --------------------- | ------------------------------------------------------------------------------------------ |
 | `SEPOLIA_RPC_URL`                   | Required              | Required              | Trusted HTTPS Sepolia JSON-RPC, used by the wallet and SDK network reads                   |
-| `CIPHERQUIZ_OPERATOR_ADDRESS`       | Required              | Preflight only        | Public address reviewed for approval; deployment key must derive exactly this address      |
+| `CIPHERQUIZ_OPERATOR_ADDRESS`       | Required              | Required              | Pinned public operator address; actual signer must derive exactly this address             |
 | `CIPHERQUIZ_OPERATOR_PRIVATE_KEY`   | Required              | Required              | Environment-only 0x-prefixed 32-byte test signer; deployment sender and immutable operator |
 | `CIPHERQUIZ_PLAYER_PRIVATE_KEY`     | Unused                | Required              | Different environment-only test signer; submits answers and authorizes decryption          |
 | `CIPHERQUIZ_SEPOLIA_ADDRESS`        | Unused                | Required              | Existing approved CipherQuizScoring deployment; never invented or defaulted                |
-| `CIPHERQUIZ_MAX_FEE_PER_GAS_WEI`    | Required              | Required              | Positive integer maximum EIP-1559 fee per gas                                              |
+| `CIPHERQUIZ_MAX_FEE_PER_GAS_WEI`    | Required              | Required              | Positive integer maximum EIP-1559 fee per gas; at most 100000000 wei (0.1 gwei)            |
 | `CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI` | Required              | Required              | Positive integer gas-cost budget for that invocation; excludes relayer service charges     |
 | `CIPHERQUIZ_SEPOLIA_DEPLOY`         | Must equal `approved` | Unused                | Set only after explicit deployment approval; leave unset now                               |
 | `CIPHERQUIZ_SEPOLIA_TEST`           | Unused                | Must equal `approved` | Explicit live-test opt-in after deployment; leave unset now                                |
 
 The outsider signer is generated ephemerally in memory and needs no ETH because it only signs decryption permits. SDK instances use separate in-memory credential stores, so player permits/results cannot leak through a shared cache. No real answer bank is loaded. The fixture uses four random dummy choices known only to this process; it submits two correct and two incorrect answers. Only encrypted handles and proofs enter key/answer calldata. The public content hash excludes keys. Output records score equality as a boolean without printing keys or answers.
 
-The deployment and integration budgets are **separate per-invocation limits**. Agree their allocations before approval, and change `CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI` for each command accordingly; using the same value twice would permit twice that value overall. Deployment fixes `authorizedOperator` to the signer and requires its public address to match the reviewed address. No ETH value, token transfer, stake or payout is sent.
+The owner's strict aggregate budget is **0.02 Sepolia ETH (20000000000000000 wei)** across deployment, integration and retries. Both commands share the ignored `contracts/.sepolia-budget.jsonl` ledger. Each write reserves its maximum gas liability durably before broadcast; a lock prevents concurrent reservations exceeding the cap. Reservations remain charged after failures, uncertain broadcasts and cheaper confirmed receipts. Never delete/reset the ledger or lock to retry, switch to a fresh clone, or manually send outside these guards. A stale lock or corrupt journal requires stopping and reviewing public receipts/reservations first. Unused budget does not authorize an onchain operation.
+
+`CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI` remains an additional per-invocation limit. Proposed allocations: deployment `2000000000000000` wei (0.002 ETH), integration `5000000000000000` wei (0.005 ETH). The shared cap takes precedence. Proposed enforced transaction limits are 15000000 gas and 100000000 wei/gas, bounding each write's gas cost at 0.0015 ETH. Deployment checks headroom for itself plus three integration write ceilings; integration checks complete three-write headroom before starting. No ETH value, staking, payout or token transfer is sent.
+
+### Secure local setup steps
+
+1. Configure public `CIPHERQUIZ_OPERATOR_ADDRESS=0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7`, `CIPHERQUIZ_MAX_FEE_PER_GAS_WEI=100000000`, and the appropriate per-invocation allocation above. Keep both approval flags unset.
+2. Privately configure `SEPOLIA_RPC_URL` through your own trusted secret manager. Do not paste it into chat/history or print environment dumps. Stage A used the SDK-preset public RPC only for explicit read-only invocations; persistent RPC credentials remain unconfigured.
+3. Privately provision `CIPHERQUIZ_OPERATOR_PRIVATE_KEY` for the supplied public wallet and `CIPHERQUIZ_PLAYER_PRIVATE_KEY` for a different player through the secret manager. The player is needed only for integration. Never expose either key through `VITE_*`, browser bundles, terminal arguments or committed files. Do not substitute another available signer for the pinned operator.
+4. Run the offline verification command below after local provisioning. It has no provider or network/write API and logs only a public address on success. Missing, malformed or mismatched signing material fails with a sanitized message. The current Stage A invocation failed as expected because no signer is configured.
+
+```sh
+npm run verify:sepolia-signer -w @cipherquiz/contracts
+```
+
+5. Run contracts build and read-only preflight with the securely injected RPC environment. Review current balance, gas estimate, fees, artifact identity and aggregate headroom. The observed operator balance was zero: deployment remains blocked until funded. No funding command is performed here.
+6. If using an optional ignored `.env`, create/populate it privately in an editor, with OS access restricted to your account. Load it explicitly; offline verification from the repository root can use:
+
+```sh
+node --env-file=contracts/.env node_modules/ts-node/dist/bin.js --project contracts/tsconfig.json contracts/scripts/verify-sepolia-signer.ts
+```
+
+7. Review the [current cost plan](sepolia-predeployment.md), then obtain explicit deployment approval. Only afterwards set `CIPHERQUIZ_SEPOLIA_DEPLOY=approved` locally and execute deployment. Integration needs separate explicit authorization, the actual deployed address and `CIPHERQUIZ_SEPOLIA_TEST=approved`. Neither flag is set during Stage A.
+
+No private key, permit, proof, RPC credential or decrypted answer is required in chat. The ledger contains public metadata and must be retained across retries. Actual receipt fees are recorded separately from conservative reservations. No external ETH-valued service/funding transaction is executed; if one is later authorized, its liability must fit the same remaining aggregate cap.
 
 ## What a successful live run would establish
 

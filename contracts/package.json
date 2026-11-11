@@ -8,7 +8,8 @@
     "test": "hardhat test",
     "lint": "solhint \"src/**/*.sol\" --max-warnings 0",
     "node": "hardhat node",
-    "deploy:sepolia": "hardhat run scripts/deploy-sepolia.ts --network sepolia"
+    "deploy:sepolia": "hardhat run scripts/deploy-sepolia.ts --network sepolia",
+    "verify:sepolia-signer": "ts-node scripts/verify-sepolia-signer.ts"
   },
   "dependencies": {
     "@fhevm/solidity": "0.11.1",
