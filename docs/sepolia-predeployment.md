@@ -1,6 +1,6 @@
 # CipherQuizScoring Stage A predeployment report
 
-Date: 2026-11-11 (Africa/Lagos). **STOP: Stage A only; no deployment or other Sepolia transaction is authorized or submitted.** The owner supplied operator `0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7` and a strict aggregate cap of **0.02 Sepolia ETH** (`20000000000000000` wei). The earlier placeholder and 0.01 ETH proposal are superseded. The current signer-specific unsigned estimate is recorded below. Signer/RPC credentials remain unconfigured; the operator has zero ETH in the observed snapshot. This report does not claim real encrypted scoring or KMS verification.
+Updated: 2026-11-12 (Africa/Lagos). **STOP: Stage A only; no deployment or other Sepolia transaction is authorized or submitted.** The owner replaced the previous operator with the separate test-only operator `0xbE4a3DAABCd4406e75314aC7324411249E0C36a2`. The strict aggregate cap remains **0.02 Sepolia ETH** (`20000000000000000` wei) across the project, including any previous-operator spending. The earlier placeholder and 0.01 ETH proposal are superseded. The 2026-11-11 balance and unsigned estimates below are historical observations for the previous operator, not fresh evidence for the replacement. See the latest [verification record](verification.md) for the new wallet's balance and remaining checks. This report does not claim real encrypted scoring or KMS verification.
 
 ## Repository and preserved work
 
@@ -36,7 +36,7 @@ Installed transitive `@fhevm/sdk 0.13.2` performs `checkPersistAllowed` before s
 
 Ran the new `npm run preflight:sepolia -w @cipherquiz/blockchain` using the public RPC in the installed Zama Sepolia preset, explicitly supplied for this read-only invocation. It creates no wallet, reads no signing key, sets no approval flag and calls no write API.
 
-Refreshed for the supplied operator at block `12112842`, timestamp `1794413724`, chain ID `11155111`. Installed protocol ID is `10001` (distinct from the Ethereum chain ID). This invocation used only public configuration and Zama's SDK-preset public RPC; it did not configure persistent RPC credentials or a signer. The aggregate ledger remains absent/unspent, with 0 wei reserved and 0.02 ETH available.
+Historical snapshot for the previous operator at block `12112842`, timestamp `1794413724`, chain ID `11155111`. Installed protocol ID is `10001` (distinct from the Ethereum chain ID). This invocation used only public configuration and Zama's SDK-preset public RPC; it did not configure persistent RPC credentials or a signer. The aggregate ledger was absent, so the local reader reported 0 wei reserved and 0.02 ETH available; absence alone does not prove no historical spending elsewhere.
 
 | Component                        | Address                                      |
 | -------------------------------- | -------------------------------------------- |
@@ -57,14 +57,14 @@ Reviewed application calldata contains encrypted handles/proofs, not plaintext k
 
 ## Deployment parameters and strict aggregate cap
 
-The supplied public operator address has valid EIP-55 casing. Both deployment and integration independently pin their actual operator signer to **0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7**, before network access. Changing only an environment address cannot authorize a different signer. The offline signer command cannot verify a match until the owner securely configures a signer locally; its current invocation correctly failed closed with a sanitized message.
+The replacement public operator address has valid EIP-55 casing. Both deployment and integration independently pin their actual operator signer to **0xbE4a3DAABCd4406e75314aC7324411249E0C36a2**, before network access. Changing only an environment address cannot authorize a different signer. The new offline signer check must wait for the owner's confirmation that the new signer is configured locally. Earlier failures with missing credentials do not verify the replacement signer.
 
 | Parameter                  | Current configuration                                                                            |
 | -------------------------- | ------------------------------------------------------------------------------------------------ |
 | Network                    | Ethereum Sepolia, chain ID 11155111 only                                                         |
-| Operator/deployer          | 0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7                                                       |
+| Operator/deployer          | 0xbE4a3DAABCd4406e75314aC7324411249E0C36a2                                                       |
 | Contract                   | contracts/src/CipherQuizScoring.sol:CipherQuizScoring                                            |
-| Constructor                | authorizedOperator = 0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7                                  |
+| Constructor                | authorizedOperator = 0xbE4a3DAABCd4406e75314aC7324411249E0C36a2                                  |
 | Transaction value          | 0 wei; no stake, payout, token transfer or automatic funding                                     |
 | Strict aggregate cap       | 0.02 ETH = 20000000000000000 wei, across deployment, integration and retries                     |
 | Proposed fee ceiling       | 0.1 gwei = 100000000 wei/gas; enforced maximum, not a fee prediction                             |
@@ -81,7 +81,7 @@ Use npm.cmd on Windows if PowerShell blocks npm.ps1. No secret value belongs in 
 
 ## Deployment and integration cost planning
 
-Read-only Sepolia eth_estimateGas for this operator and the reviewed creation bytecode returned **8839309 gas**; the script's 20% margin gives **10607171 gas**. At the proposed 0.1 gwei ceiling, maximum deployment gas liability is **0.0010607171 ETH**. The observed operator balance is **0 ETH**, so deployment is blocked on funding. The RPC snapshot suggested max/priority fees of 71/50 wei per gas; the corresponding deployment estimate is 0.000000000627590939 ETH. These are volatile provider suggestions, not approved or guaranteed future prices. Costs are denominated in Sepolia test ETH, with no fiat-cost claim.
+Historical read-only Sepolia eth_estimateGas for the previous operator and the reviewed creation bytecode returned **8839309 gas**; the script's 20% margin gives **10607171 gas**. At the proposed 0.1 gwei ceiling, that snapshot's maximum deployment gas liability was **0.0010607171 ETH**. The previous operator then had **0 ETH**. These values must be refreshed for the replacement operator before requesting deployment approval. The historical RPC snapshot suggested max/priority fees of 71/50 wei per gas; the corresponding deployment estimate was 0.000000000627590939 ETH. These are volatile provider suggestions, not approved or guaranteed future prices. Costs are denominated in Sepolia test ETH, with no fiat-cost claim.
 
 The earlier local unsigned estimate of 1545261 gas is materially lower and must not substitute for this network estimate. The creation bytecode hash is unchanged. No transaction receipt exists.
 

@@ -13,7 +13,7 @@ import { resolve } from 'node:path';
 import { getAddress } from 'ethers';
 
 // Public owner-supplied policy. Changing these values requires a new approval review.
-export const REVIEWED_OPERATOR = '0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7';
+export const REVIEWED_OPERATOR = '0xbE4a3DAABCd4406e75314aC7324411249E0C36a2';
 export const AGGREGATE_CAP_WEI = 20_000_000_000_000_000n;
 // Proposed conservative transaction limits, subject to the deployment approval.
 export const MAX_FEE_PER_GAS_WEI = 100_000_000n; // 0.1 gwei
@@ -50,7 +50,11 @@ export function readBudgetLedger(path = BUDGET_LEDGER) {
     for (const line of data.trimEnd().split('\n')) {
       const entry = JSON.parse(line) as Reservation;
       assert.equal(entry.chainId, 11155111);
-      assert.equal(entry.operator, REVIEWED_OPERATOR);
+      assert.equal(
+        entry.operator,
+        REVIEWED_OPERATOR,
+        'Budget ledger operator mismatch; reconcile existing reservations before any write; never reset the aggregate cap',
+      );
       assert.ok(
         typeof entry.id === 'string' &&
           entry.id.length > 0 &&

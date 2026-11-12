@@ -19,12 +19,47 @@ function journal() {
 }
 
 test('public policy pins the supplied operator address independently of the environment', () => {
+  assert.equal(REVIEWED_OPERATOR, '0xbE4a3DAABCd4406e75314aC7324411249E0C36a2');
+  assert.equal(AGGREGATE_CAP_WEI, 20_000_000_000_000_000n);
   assert.doesNotThrow(() =>
     assertReviewedOperator(REVIEWED_OPERATOR.toLowerCase()),
   );
   assert.throws(() =>
     assertReviewedOperator('0x0000000000000000000000000000000000000001'),
   );
+  assert.throws(() =>
+    assertReviewedOperator('0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7'),
+  );
+});
+
+test('retired-operator reservations block reads and new reservations without changing the ledger', () => {
+  const path = journal();
+  const entry = {
+    id: 'retired-operator-reservation',
+    chainId: 11155111,
+    operator: '0x3184FDC5E288619Eb17127D32e373239EE8d7Bb7',
+    operation: 'deployment',
+    reservedWei: '1500000000000000',
+  };
+  // A mixed journal must also fail, even when the current operator has valid entries.
+  for (const operators of [
+    [entry.operator],
+    [REVIEWED_OPERATOR, entry.operator],
+  ]) {
+    const before =
+      operators
+        .map((operator, index) =>
+          JSON.stringify({ ...entry, id: `${entry.id}-${index}`, operator }),
+        )
+        .join('\n') + '\n';
+    writeFileSync(path, before);
+    assert.throws(() => readBudgetLedger(path), /operator mismatch/);
+    assert.throws(
+      () => reserveGasBudget('new-operator-deployment', 1n, 1n, path),
+      /operator mismatch/,
+    );
+    assert.equal(readFileSync(path, 'utf8'), before);
+  }
 });
 
 test('deployment, integration and retries share a durable worst-case aggregate cap', () => {
