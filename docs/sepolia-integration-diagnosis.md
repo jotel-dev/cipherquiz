@@ -2,6 +2,8 @@
 
 Date: **2026-11-13**. Scope: inspection, public RPC reads, local tests and source/documentation updates only. **No Sepolia signing, permit issuance, decryption request or write was performed during this diagnosis.** Deployment and integration flags remain unset; spending policy and the persistent journal were not changed.
 
+Subsequent separately authorized work: the [single player-only offchain diagnostic](sepolia-player-offchain-diagnostic.md) completed one one-day permit, observed SDK `NotEntitledError` rejection before any remote KMS request, and reproduced the strict error-name classifier mismatch. The original report below remains the historical read-only evidence boundary.
+
 ## Finding and evidence boundary
 
 **Round 1 is recoverable, but the precise original exception is not recoverable from the retained execution report.** The confirmed failure boundary is after successful `submitAnswers` and its duplicate-submission rejection check, before `finalizeRound`. No completed `verified-sdk-acl-denial` marker was recorded. The original failed worker was stopped after its test failed but before a detailed exception was emitted. The [complete execution report](sepolia-integration-execution.md) is the retained evidence; no additional detailed execution log was found in the repository.
