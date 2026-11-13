@@ -1,5 +1,21 @@
 # Verification record
 
+## Final read-only predeployment review (2026-11-13)
+
+The owner reported offline `reviewed-signer-matched` for `0xbE4a3DAABCd4406e75314aC7324411249E0C36a2`. The [final report](sepolia-final-review.md) supersedes historical pending-signer and deployment-estimate statements. No transaction was signed/broadcast, no production reservation was made and neither approval flag changed. The ignored `contracts/.env` remained byte-for-byte unchanged.
+
+The enhanced public-only preflight passed against the configured HTTPS RPC: Ethereum Sepolia chain **11155111**, latest block **12125994** and finalized block **12125909**, both with operator balance **0.05 ETH**. New operator confirmed/provider-pending nonce was **0/0**; the retired operator also returned **0/0** at block **12126002**. Ledger/lock were absent. Infrastructure parity/code checks passed; creation-bytecode hash remained `0x4b033120899ac98fde5d0e1f8eded615afd01a48d825fdcc06766f3bd877cbcf`. No CipherQuiz deployment was created or discovered.
+
+Fresh unsigned deployment estimate: **8839309 gas**; with 20% margin **10607171 gas**. Maximum fee at **0.1 gwei** is **0.0010607171 ETH**; deployment plus three absolute-ceiling integration writes is **0.0055607171 ETH**. Initial four-write attempt plus two full retries at all absolute limits costs at most **0.018 ETH**, within the unchanged **0.02 ETH** aggregate cap. These are bounds, not retry authorization. The scripts' absolute deployment ceiling remains **0.0015 ETH** if a fresh estimate rises.
+
+`npm run check` passed all builds, typechecks, lint, formatting and **32 local tests** (3 API, 4 frontend, 11 blockchain guards/policy, 14 Hardhat), with zero failures/skips. A new ledger regression rejects wrong chain, empty metadata, duplicate IDs, non-positive/fractional amounts and over-cap totals without changing the journal. Existing operator-rotation and cumulative-cap assertions remain intact. Local Hardhat tests use FHE mocks, not real KMS. The first sandboxed check failed at the established Vite/esbuild parent-directory restriction; authorized external execution passed. The first sandboxed RPC request failed; external read-only preflight passed. No live integration/deployment command was run.
+
+Secret scan: **131 tracked/untracked files and 231 reachable Git blob/commit objects**, no configured-secret literals or selected credential patterns; no populated env path in reachable history. Final exact-secret scan: **132 source files and 45 build/artifact files**, zero matches; env file unchanged, both flags unset, ledger/lock absent. Exact values were never printed. These are bounded scans, not absolute absence guarantees. Final formatting and `git diff --check` passed.
+
+The sandboxed npm advisory request failed. Automatic approval review rejected the external retry because it would send private-repository dependency metadata to npm's registry. No bypass was attempted; current advisory status remains unverified pending separate approval. Earlier advisory numbers are historical. Dependencies, lockfile, Solidity and frontend behavior are unchanged; no clean-install reproduction was run.
+
+Deployment awaits explicit approval and fresh execution-time guards. Integration additionally awaits a different funded player, a deployed address and separate authorization. Live proof/circuit/KMS behavior and independent remote KMS denial remain unverified. Local accounting cannot constrain manual sends, ledger deletion or another checkout; any contrary history requires reconciliation under the same project cap.
+
 ## Test-only operator rotation (2026-11-12)
 
 The owner replaced the previous wallet with test-only operator `0xbE4a3DAABCd4406e75314aC7324411249E0C36a2`. Deployment, integration, read-only preflight and the offline signer check share this pinned public policy. Both environment examples and the local ignored `contracts/.env` public address were updated. The local edit changed only the fixed-width public address; all other bytes were preserved. No signer secret was parsed or printed. Solidity, frontend logic, dependencies and the **0.02 ETH project-wide aggregate cap** are unchanged.

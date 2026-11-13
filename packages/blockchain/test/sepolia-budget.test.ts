@@ -92,6 +92,37 @@ test('a locked or damaged budget ledger stops further reservations', () => {
   }
 });
 
+test('invalid reservation metadata or amounts cannot free aggregate capacity', () => {
+  const path = journal();
+  const entry = {
+    id: 'existing-reservation',
+    chainId: 11155111,
+    operator: REVIEWED_OPERATOR,
+    operation: 'deployment',
+    reservedWei: '1500000000000000',
+  };
+  const invalidEntries = [
+    { ...entry, chainId: 1 },
+    { ...entry, id: '' },
+    { ...entry, operation: '' },
+    ...['0', '-1', '1.5', (AGGREGATE_CAP_WEI + 1n).toString()].map(
+      (reservedWei) => ({ ...entry, reservedWei }),
+    ),
+  ];
+  const journals = [
+    ...invalidEntries.map((invalid) => [invalid]),
+    [entry, entry],
+  ];
+  for (const entries of journals) {
+    const before =
+      entries.map((value) => JSON.stringify(value)).join('\n') + '\n';
+    writeFileSync(path, before);
+    assert.throws(() => readBudgetLedger(path));
+    assert.throws(() => reserveGasBudget('retry', 1n, 1n, path));
+    assert.equal(readFileSync(path, 'utf8'), before);
+  }
+});
+
 test('transaction fee and gas ceilings cannot be raised through environment limits', () => {
   const path = journal();
   assert.throws(

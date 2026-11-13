@@ -1,5 +1,7 @@
 # CipherQuizScoring Stage A predeployment report
 
+**Historical report:** the [final read-only review of 2026-11-13](sepolia-final-review.md) supersedes this report's balance, estimates and pending-signer statements. Deployment approval remains pending; no approval flags were changed.
+
 Updated: 2026-11-12 (Africa/Lagos). **STOP: Stage A only; no deployment or other Sepolia transaction is authorized or submitted.** The owner replaced the previous operator with the separate test-only operator `0xbE4a3DAABCd4406e75314aC7324411249E0C36a2`. The strict aggregate cap remains **0.02 Sepolia ETH** (`20000000000000000` wei) across the project, including any previous-operator spending. The earlier placeholder and 0.01 ETH proposal are superseded. The 2026-11-11 balance and unsigned estimates below are historical observations for the previous operator, not fresh evidence for the replacement. See the latest [verification record](verification.md) for the new wallet's balance and remaining checks. This report does not claim real encrypted scoring or KMS verification.
 
 ## Repository and preserved work

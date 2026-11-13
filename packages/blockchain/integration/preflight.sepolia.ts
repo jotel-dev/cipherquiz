@@ -86,7 +86,24 @@ async function main() {
       assert.ok(code && code !== '0x');
       codeHashes[address] = keccak256(code);
     }
-    const block = await client.getBlock();
+    const block = await client.getBlock({ blockTag: 'latest' });
+    const finalizedBlock = await client.getBlock({ blockTag: 'finalized' });
+    const balance = await client.getBalance({
+      address: operator,
+      blockNumber: block.number,
+    });
+    const finalizedBalance = await client.getBalance({
+      address: operator,
+      blockNumber: finalizedBlock.number,
+    });
+    const confirmedNonce = await client.getTransactionCount({
+      address: operator,
+      blockNumber: block.number,
+    });
+    const pendingNonce = await client.getTransactionCount({
+      address: operator,
+      blockTag: 'pending',
+    });
     const fees = await client.estimateFeesPerGas();
     const artifact = JSON.parse(
       await readFile(
@@ -112,7 +129,6 @@ async function main() {
       });
       const gasLimit = (estimatedGas * 120n + 99n) / 100n;
       assert.ok(gasLimit <= MAX_GAS_PER_TX, 'Deployment gas ceiling exceeded');
-      const balance = await client.getBalance({ address: operator });
       assert.ok(
         (gasLimit + 3n * MAX_GAS_PER_TX) * feeCap <= budget.remainingWei,
         'Deployment plus integration ceilings exceed remaining aggregate budget',
@@ -129,12 +145,15 @@ async function main() {
         gasLimit: gasLimit.toString(),
         estimatedCostEth: formatEther(estimatedGas * fees.maxFeePerGas),
         balanceEth: formatEther(balance),
+        finalizedBalanceEth: formatEther(finalizedBalance),
         planningFeeCapWei: feeCap.toString(),
         maximumGasLiabilityEth: formatEther(gasLimit * feeCap),
         deploymentPlusIntegrationCeilingEth: formatEther(
           (gasLimit + 3n * MAX_GAS_PER_TX) * feeCap,
         ),
         sufficientBalanceAtPlanningCap: balance >= gasLimit * feeCap,
+        sufficientFinalizedBalanceAtPlanningCap:
+          finalizedBalance >= gasLimit * feeCap,
         sufficientBalanceAtSuggestedFee:
           balance >= gasLimit * fees.maxFeePerGas,
       };
@@ -146,7 +165,13 @@ async function main() {
           chainId: 11155111,
           protocolId: 10001,
           observedBlock: block.number.toString(),
+          observedBlockHash: block.hash,
           observedTimestamp: block.timestamp.toString(),
+          finalizedBlock: finalizedBlock.number.toString(),
+          finalizedBlockHash: finalizedBlock.hash,
+          finalizedTimestamp: finalizedBlock.timestamp.toString(),
+          confirmedOperatorNonce: confirmedNonce,
+          pendingOperatorNonce: pendingNonce,
           acl,
           executor,
           kms,
