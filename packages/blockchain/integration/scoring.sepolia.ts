@@ -290,7 +290,7 @@ test(
           maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
         });
         // Log hash immediately: a failed wait must not hide an already-broadcast transaction.
-        t.diagnostic(
+        console.info(
           JSON.stringify({
             operation: functionName,
             transactionHash: hash,
@@ -366,7 +366,17 @@ test(
       }
       async function deny(sdk: ZamaSDK, handle: Hex, label: string) {
         // Explicitly scope any new offchain permit to this scoring contract only.
+        stage = `${label}: scoped permit setup`;
         await sdk.permits.grantPermit([settings.address]);
+        t.diagnostic(
+          JSON.stringify({
+            operation: label,
+            status: 'scoped-permit-ready',
+            contract: settings.address,
+            maximumLifetimeDays: 30,
+          }),
+        );
+        stage = `${label}: SDK ACL denial`;
         await assert.rejects(
           sdk.decryption.decryptValues(
             [{ encryptedValue: handle, contractAddress: settings.address }],
@@ -537,6 +547,7 @@ test(
         ],
         'InvalidState',
       );
+      stage = 'post-submission score state';
       const submitted = await client.readContract({
         address: settings.address,
         abi,
@@ -546,6 +557,7 @@ test(
       const score = submitted[4];
       assert.equal(submitted[3], 2);
       assert.notEqual(score, toHex(0, { size: 32 }));
+      stage = 'pre-finalization score ACL';
       assert.equal(await allowed(score, settings.address), true);
       assert.equal(await allowed(score, player.address), false);
       assert.equal(await allowed(score, operator.address), false);
@@ -605,6 +617,13 @@ test(
         /^(Missing |Set CIPHERQUIZ|Sepolia RPC)/.test(error.message)
           ? `: ${error.message}`
           : '';
+      console.error(
+        JSON.stringify({
+          status: 'integration-failed',
+          stage,
+          sensitiveDetailsSuppressed: true,
+        }),
+      );
       throw new Error(
         `Sepolia integration failed at ${stage}${configurationMessage}. Sensitive error details suppressed.`,
       );

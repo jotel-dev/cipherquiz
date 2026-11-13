@@ -1,5 +1,7 @@
 # Sepolia integration readiness and approval scope
 
+**Subsequent authorized execution:** one owner-approved invocation submitted `createRound` and `submitAnswers` successfully, then failed at a post-submission check before `finalizeRound`. Round **1** remains **Submitted**; score decryption and remote KMS denial remain unverified. No retry occurred. The ledger now retains **0.0182950036 ETH**. See the [execution and reconciliation report](sepolia-integration-execution.md). The readiness/approval figures below are the historical pre-invocation snapshot; authorization is consumed.
+
 Reviewed **2026-11-13 (Africa/Lagos)**. **STOP: no integration execution or signature is authorized yet.** Player funding is now finalized, both identities/configuration and the deployment have passed their checks, and the exact **0.0045 ETH** invocation allocation is prepared. No active reservation, live-wallet/SDK signature, scoring round or Sepolia transaction was created. Local tests use isolated disposable mock signers. Owner approval of the three writes and offchain permits is the remaining execution gate.
 
 ## Finalized account and deployment checks
