@@ -4,6 +4,8 @@ Date: **2026-11-13 (Africa/Lagos)**. **PARTIAL RESULT — stopped after two succ
 
 See the subsequent [read-only diagnosis](sepolia-integration-diagnosis.md) for finalized receipts, historical/current ACL checks, deadline and recovery analysis, retained budget and the limits of the missing original exception. That diagnosis does not authorize continuation.
 
+**Later separately authorized recovery:** after the SDK mismatch was diagnosed and corrected locally, **one `finalizeRound(1)` succeeded**. Round 1 is now Finalized with the same encrypted score and player access enabled; decryption remains unverified. Current retained allowance is **0.0182746774 ETH**. See the [finalization report](sepolia-round-1-finalization.md). The partial execution and Submitted state described below are the original invocation's historical outcome.
+
 ## Authorization and prechecks
 
 The owner explicitly authorized one invocation against **0x4b4c204d28D5ee37896278C5fc56d61086f92b53**, Ethereum Sepolia **11155111**, limited to operator `createRound`, player `submitAnswers`, operator `finalizeRound`, **0.0015 ETH per write / 0.0045 ETH combined**, and the retained **0.02 ETH** project cap. Reviewed single-contract EIP-712 permits of at most 30 days were authorized for the player/operator/ephemeral stranger. No extra deployment, staking, funding, limit change, merge or automatic retry was authorized.

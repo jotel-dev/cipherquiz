@@ -26,4 +26,31 @@ An already Submitted round remains eligible after its original deadline: finaliz
 
 ## Execution record
 
-**Pending the fresh preflight and one approved transaction.** The local fix and guarded recovery source are validated and pushed before execution. The result and new retained reservation will be appended after the attempt. Retaining this script does not authorize another invocation.
+**Success: exactly one operator transaction was broadcast and mined. No retry, other transaction, permit or decryption request occurred.** The verified local fix and guarded source were committed and pushed as **`26c14de`** before execution; remote identity and a clean worktree were verified before creating the temporary launcher.
+
+Fresh preflight at block **12127967**, timestamp **1794597144**, passed all guards: chain **11155111**, actual approved operator signer, exact contract/runtime/immutable operator, round 1 Submitted with the unchanged submission-block score, player/operator/public denial, contract score access, `nextRoundId = 2`, no ledger lock, three exact original reservations and **0.0182950036 ETH** available. The original deadline **1794590952** had expired; simulation succeeded because the round was Submitted. Operator confirmed/pending nonce **2/2**, latest/finalized balance **49999999801547805 wei = 0.049999999801547805 ETH**. Both existing approval flags remained unset.
+
+| Field                                         | Verified value                                                               |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| Transaction                                   | `0x5ed8fc94f071c2d69479e400547dac139673e84e914e18092fe986063ae897dd`         |
+| Call                                          | Operator `finalizeRound(1)` to the reviewed contract                         |
+| Chain / nonce / ETH value                     | **11155111 / 2 / 0**                                                         |
+| Gas estimate / limit                          | **169385 / 203262**                                                          |
+| Suggested maximum / actual configured ceiling | **22 / 100000000 wei per gas**                                               |
+| Priority fee ceiling                          | **2 wei per gas**                                                            |
+| Maximum transaction liability                 | **20326200000000 wei = 0.0000203262 ETH**, below the approved **0.0015 ETH** |
+| Reservation ID                                | `90083e9f-0bf6-41f8-8eae-65564794ecaa`                                       |
+| Receipt status / block                        | **1 (success) / 12127968**                                                   |
+| Gas used                                      | **164439**                                                                   |
+| Effective gas price                           | **19 wei per gas**                                                           |
+| Actual fee                                    | **3124341 wei = 0.000000000003124341 ETH**                                   |
+| Event                                         | **`RoundFinalized(1)`**                                                      |
+| Remaining aggregate allowance                 | **18274677400000000 wei = 0.0182746774 ETH**                                 |
+
+The runner waited for two confirmations. A separate read-only reconciliation at block **12127976** observed **nine confirmations**, receipt status 1, correct target/caller/function/round/nonce/zero value and independently recomputed **164439 × 19 = 3124341 wei**. The receipt had **not yet reached Ethereum's finalized checkpoint** at that snapshot. This distinction is separate from the contract's `Finalized` lifecycle state; no claim of Ethereum checkpoint finality is made.
+
+Both the transaction runner and independent readback verified round **1 Finalized (3)** with the exact original encrypted score, unchanged player/deadline/content commitment/question count and no new round. Score ACL: **player true**, **contract true**, **operator false**, **public decryption false**. Operator confirmed/pending nonce is now **3/3**. No plaintext score was requested or observed; **2/4** and remote KMS decryption/denial remain unverified.
+
+The canonical ledger now contains exactly **four** chain/operator-bound reservations. The original deployment/create/submit entries are byte-for-byte retained as the journal prefix; the only appended operation is **`finalizeRound(1)`**, reserved at **0.0000203262 ETH**. Total permanently reserved liability is **0.0017253226 ETH**, leaving **0.0182746774 ETH** under the unchanged **0.02 ETH** cap. No savings were released. The populated env file was verified byte-for-byte unchanged. No stderr output, watchdog timeout or attempt error occurred. Temporary launch/readback tools were removed.
+
+**The one-transaction authorization is consumed. Stop: no further transaction, permit or decryption request is authorized.** Retaining the guarded script does not authorize another invocation; its original Submitted-state/nonce/ledger guards now reject this completed state.
