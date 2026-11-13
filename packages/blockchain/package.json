@@ -12,6 +12,8 @@
     "test": "tsx --test test/*.test.ts",
     "preflight:sepolia": "tsx integration/preflight.sepolia.ts",
     "prepare:sepolia": "tsx integration/prepare.sepolia.ts",
+    "verify:sepolia-player": "tsx integration/verify-player.ts",
+    "check:sepolia-player": "tsx integration/check-player.sepolia.ts",
     "test:sepolia": "tsx --test integration/scoring.sepolia.ts"
   },
   "dependencies": {

@@ -10,6 +10,7 @@ import {
   assertReviewedDeployment,
   integrationCeilings,
 } from './reviewed-deployment.js';
+import { verifyPlayerSigner } from './player.js';
 
 export function required(env: NodeJS.ProcessEnv, name: string): string {
   const value = env[name];
@@ -51,6 +52,7 @@ export function readSettings(env: NodeJS.ProcessEnv) {
     privateKeyToAccount(playerKey).address,
     'Operator and player must differ',
   );
+  verifyPlayerSigner(playerKey, required(env, 'CIPHERQUIZ_PLAYER_ADDRESS'));
   const totalGasBudget = positive('CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI');
   const maxFeePerGas = positive('CIPHERQUIZ_MAX_FEE_PER_GAS_WEI');
   assert.ok(

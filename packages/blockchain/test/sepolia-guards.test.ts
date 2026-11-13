@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { generatePrivateKey } from 'viem/accounts';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { REVIEWED_OPERATOR } from '../../../contracts/scripts/sepolia-policy.js';
 import {
   SCORING_ADDRESS,
@@ -48,12 +48,25 @@ test('live settings isolate signer roles and require explicit positive fee budge
     CIPHERQUIZ_OPERATOR_PRIVATE_KEY: operatorKey,
     CIPHERQUIZ_OPERATOR_ADDRESS: REVIEWED_OPERATOR,
     CIPHERQUIZ_PLAYER_PRIVATE_KEY: operatorKey,
+    CIPHERQUIZ_PLAYER_ADDRESS: privateKeyToAccount(operatorKey).address,
     CIPHERQUIZ_MAX_FEE_PER_GAS_WEI: '100000000',
     CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI: '7000000000000000',
   };
   assert.throws(() => readSettings(env), /Operator and player must differ/);
   env.CIPHERQUIZ_PLAYER_PRIVATE_KEY = generatePrivateKey();
+  env.CIPHERQUIZ_PLAYER_ADDRESS = privateKeyToAccount(
+    env.CIPHERQUIZ_PLAYER_PRIVATE_KEY,
+  ).address;
   assert.equal(readSettings(env).maxFeePerGas, 100_000_000n);
+  assert.throws(
+    () => readSettings({ ...env, CIPHERQUIZ_PLAYER_ADDRESS: '' }),
+    /Missing CIPHERQUIZ_PLAYER_ADDRESS/,
+  );
+  assert.throws(
+    () =>
+      readSettings({ ...env, CIPHERQUIZ_PLAYER_ADDRESS: REVIEWED_OPERATOR }),
+    /Player signer\/public address verification failed/,
+  );
   for (const name of [
     'CIPHERQUIZ_MAX_FEE_PER_GAS_WEI',
     'CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI',
