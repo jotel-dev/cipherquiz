@@ -8,6 +8,7 @@ import {
   integrationCeilings,
 } from '../integration/reviewed-deployment.js';
 import {
+  diagnosticErrorTypes,
   isAclDenial,
   maskImmutables,
   packAnswer,
@@ -174,6 +175,37 @@ test('denial evidence excludes network errors and unrelated SDK failures', () =>
   const cyclic: { cause?: unknown } = {};
   cyclic.cause = cyclic;
   assert.equal(isAclDenial(cyclic), false);
+  // SDK 3.7.2 wraps underlying ACL errors. A typed wrapper alone is not proof
+  // that the original invocation reached ACL preflight, much less remote KMS.
+  assert.equal(isAclDenial({ name: 'NotEntitledError' }), false);
+  assert.equal(
+    isAclDenial({
+      name: 'NotEntitledError',
+      cause: { name: 'AclUserDecryptionError' },
+    }),
+    true,
+  );
+});
+
+test('failure diagnostics retain allowlisted types without serializing sensitive fields', () => {
+  const secret = 'sensitive-test-sentinel';
+  const error = {
+    name: 'NotEntitledError',
+    code: 'NOT_ENTITLED',
+    message: secret,
+    request: { privateKey: secret },
+    cause: { name: 'AclUserDecryptionError', message: secret },
+  };
+  assert.deepEqual(diagnosticErrorTypes(error), [
+    'NotEntitledError',
+    'NOT_ENTITLED',
+    'AclUserDecryptionError',
+  ]);
+  assert.deepEqual(diagnosticErrorTypes({ name: secret, code: secret }), []);
+  const cyclic: { cause?: unknown; name: string } = { name: 'TimeoutError' };
+  cyclic.cause = cyclic;
+  assert.deepEqual(diagnosticErrorTypes(cyclic), ['TimeoutError']);
+  assert.deepEqual(diagnosticErrorTypes(null), []);
 });
 
 test('runtime identity masks only compiler-declared immutable bytes', () => {

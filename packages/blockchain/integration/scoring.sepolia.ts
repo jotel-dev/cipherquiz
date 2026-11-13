@@ -30,6 +30,7 @@ import {
   reserveGasBudget,
 } from '../../../contracts/scripts/sepolia-policy.js';
 import {
+  diagnosticErrorTypes,
   isAclDenial,
   maskImmutables,
   packAnswer,
@@ -52,6 +53,11 @@ test(
   { timeout: 1_200_000 },
   async (t) => {
     let stage = 'configuration';
+    function checkpoint(next: string) {
+      stage = next;
+      // Node test diagnostics may remain buffered while an SDK worker is alive.
+      console.info(JSON.stringify({ status: 'checkpoint', stage }));
+    }
     const sdks: ZamaSDK[] = [];
     try {
       const settings = readSettings(process.env);
@@ -366,9 +372,9 @@ test(
       }
       async function deny(sdk: ZamaSDK, handle: Hex, label: string) {
         // Explicitly scope any new offchain permit to this scoring contract only.
-        stage = `${label}: scoped permit setup`;
+        checkpoint(`${label}: scoped permit setup`);
         await sdk.permits.grantPermit([settings.address]);
-        t.diagnostic(
+        console.info(
           JSON.stringify({
             operation: label,
             status: 'scoped-permit-ready',
@@ -376,14 +382,33 @@ test(
             maximumLifetimeDays: 30,
           }),
         );
-        stage = `${label}: SDK ACL denial`;
-        await assert.rejects(
-          sdk.decryption.decryptValues(
-            [{ encryptedValue: handle, contractAddress: settings.address }],
-            { timeout: 180_000, signal: t.signal },
-          ),
-          isAclDenial,
-        );
+        checkpoint(`${label}: SDK ACL denial`);
+        await assert.rejects(async () => {
+          try {
+            const result = await sdk.decryption.decryptValues(
+              [{ encryptedValue: handle, contractAddress: settings.address }],
+              { timeout: 180_000, signal: t.signal },
+            );
+            console.error(
+              JSON.stringify({
+                status: 'unexpected-decryption-success',
+                stage,
+              }),
+            );
+            return result;
+          } catch (error) {
+            console.info(
+              JSON.stringify({
+                status: 'sdk-decryption-rejected',
+                stage,
+                errorTypes: diagnosticErrorTypes(error),
+                acceptedAclEvidence: isAclDenial(error),
+                remoteKmsDenialVerified: false,
+              }),
+            );
+            throw error;
+          }
+        }, isAclDenial);
         t.diagnostic(
           JSON.stringify({
             operation: label,
@@ -547,7 +572,7 @@ test(
         ],
         'InvalidState',
       );
-      stage = 'post-submission score state';
+      checkpoint('post-submission score state');
       const submitted = await client.readContract({
         address: settings.address,
         abi,
@@ -557,10 +582,13 @@ test(
       const score = submitted[4];
       assert.equal(submitted[3], 2);
       assert.notEqual(score, toHex(0, { size: 32 }));
-      stage = 'pre-finalization score ACL';
+      checkpoint('pre-finalization score ACL: contract');
       assert.equal(await allowed(score, settings.address), true);
+      checkpoint('pre-finalization score ACL: player');
       assert.equal(await allowed(score, player.address), false);
+      checkpoint('pre-finalization score ACL: operator');
       assert.equal(await allowed(score, operator.address), false);
+      checkpoint('pre-finalization score ACL: stranger');
       assert.equal(await allowed(score, stranger.address), false);
       await deny(participant.sdk, score, 'player before finalization');
       stage = 'finalization and final ACL';
@@ -621,6 +649,7 @@ test(
         JSON.stringify({
           status: 'integration-failed',
           stage,
+          errorTypes: diagnosticErrorTypes(error),
           sensitiveDetailsSuppressed: true,
         }),
       );

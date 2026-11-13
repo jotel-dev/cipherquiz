@@ -109,6 +109,47 @@ export function isAclDenial(error: unknown): boolean {
   return false;
 }
 
+// Emit only fixed identifiers: SDK messages, metadata and request bodies can be sensitive.
+// This is diagnostic evidence only; it does not decide whether denial tests pass.
+export function diagnosticErrorTypes(error: unknown): string[] {
+  const permitted = new Set([
+    'AssertionError',
+    'ERR_ASSERTION',
+    'AbortError',
+    'TimeoutError',
+    'AclUserDecryptionError',
+    'NotEntitledError',
+    'NOT_ENTITLED',
+    'DecryptionFailedError',
+    'DECRYPTION_FAILED',
+    'NoCiphertextError',
+    'RelayerRequestFailedError',
+    'RpcRateLimitError',
+    'SigningFailedError',
+    'SigningRejectedError',
+    'RevokedKmsContextError',
+    'InvalidTransportKeyPairError',
+  ]);
+  const result = new Set<string>();
+  const seen = new Set<unknown>();
+  let current = error;
+  while (
+    current &&
+    typeof current === 'object' &&
+    !seen.has(current) &&
+    seen.size < 12
+  ) {
+    seen.add(current);
+    const fields = current as Record<string, unknown>;
+    for (const field of ['name', 'code'] as const) {
+      const value = fields[field];
+      if (typeof value === 'string' && permitted.has(value)) result.add(value);
+    }
+    current = 'cause' in current ? current.cause : undefined;
+  }
+  return [...result];
+}
+
 export function maskImmutables(
   code: Hex,
   references: Record<string, { start: number; length: number }[]>,
