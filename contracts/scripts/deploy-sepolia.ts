@@ -9,7 +9,7 @@ import {
   reserveGasBudget,
 } from './sepolia-policy';
 
-// Prepared only. Set the approval flag solely after explicit owner authorization.
+// Set the approval flag solely after explicit owner authorization.
 // No default key, mnemonic, public RPC, or local deployment fallback.
 async function main() {
   assert.equal(
@@ -75,6 +75,11 @@ async function main() {
       'CipherQuizScoring',
       signer,
     );
+    assert.equal(
+      ethers.keccak256(factory.bytecode),
+      '0x4b033120899ac98fde5d0e1f8eded615afd01a48d825fdcc06766f3bd877cbcf',
+      'Creation bytecode differs from reviewed deployment',
+    );
     const deployment = await factory.getDeployTransaction(signer.address);
     const estimatedGas = await ethers.provider.estimateGas({
       ...deployment,
@@ -95,9 +100,41 @@ async function main() {
       'Priority fee cap exceeded',
     );
     assert.ok(gasLimit * maxFeePerGas <= budget, 'Deployment budget exceeded');
-    assert.ok(
-      (await ethers.provider.getBalance(signer.address)) >=
-        gasLimit * maxFeePerGas,
+    stage = 'final pre-broadcast checks';
+    const balance = await ethers.provider.getBalance(signer.address);
+    const finalizedBalance = await ethers.provider.getBalance(
+      signer.address,
+      'finalized',
+    );
+    assert.ok(balance >= gasLimit * maxFeePerGas);
+    assert.ok(finalizedBalance >= gasLimit * maxFeePerGas);
+    const nonce = await ethers.provider.getTransactionCount(
+      signer.address,
+      'latest',
+    );
+    const pendingNonce = await ethers.provider.getTransactionCount(
+      signer.address,
+      'pending',
+    );
+    assert.equal(nonce, 0, 'Reviewed first deployment requires nonce zero');
+    assert.equal(pendingNonce, nonce, 'Pending operator transaction detected');
+    assert.equal((await ethers.provider.getNetwork()).chainId, 11155111n);
+    console.info(
+      JSON.stringify({
+        status: 'approved-deployment-preflight-passed',
+        chainId: 11155111,
+        operator: signer.address,
+        confirmedBalanceWei: balance.toString(),
+        finalizedBalanceWei: finalizedBalance.toString(),
+        nonce,
+        pendingNonce,
+        gasEstimate: estimatedGas.toString(),
+        gasLimit: gasLimit.toString(),
+        maxFeePerGasWei: maxFeePerGas.toString(),
+        suggestedMaxFeePerGasWei: fees.maxFeePerGas.toString(),
+        maxPriorityFeePerGasWei: fees.maxPriorityFeePerGas.toString(),
+        maximumCostWei: (gasLimit * maxFeePerGas).toString(),
+      }),
     );
     stage = 'approved deployment broadcast';
     const reservation = reserveGasBudget('deployment', gasLimit, maxFeePerGas);
@@ -110,6 +147,7 @@ async function main() {
     );
     const started = Date.now();
     const contract = await factory.deploy(signer.address, {
+      nonce,
       gasLimit,
       maxFeePerGas,
       maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
@@ -136,6 +174,11 @@ async function main() {
         gasUsed: receipt.gasUsed.toString(),
         gasEstimate: estimatedGas.toString(),
         gasLimit: gasLimit.toString(),
+        receiptStatus: receipt.status,
+        nonce: transaction.nonce,
+        effectiveGasPriceWei: receipt.gasPrice.toString(),
+        reservedWei: reservation.reservedWei.toString(),
+        aggregateRemainingWei: readBudgetLedger().remainingWei.toString(),
         elapsedMs: Date.now() - started,
         feeWei: (receipt.gasUsed * receipt.gasPrice).toString(),
       }),
