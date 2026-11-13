@@ -1,5 +1,7 @@
 # Sepolia deployment execution record
 
+**Latest read-only follow-up (2026-11-13):** after the owner reported correcting the prefix, the existing strict offline verifier still failed. The on-disk env file remained identical to the stopped-attempt version and its key representation remained unprefixed, with no inherited key override. Separate offline public-address derivation matched the intended operator, but `reviewed-signer-matched` was not established by the strict verifier. The public preflight passed at mined/finalized blocks **12126229/12126164**: chain **11155111**, balance **0.05 ETH** at both, nonce **0/0**, no reservations, and **0.02 ETH** remaining. Fresh estimate **8839309 gas**, gas limit **10607171**, fee ceiling **0.1 gwei**, maximum liability **0.0010607171 ETH**, within the **0.0015 ETH** transaction cap. No secret/flag/limit was changed and no new deployment attempt was made. See [verification](verification.md) for details. Save the corrected local representation and successfully verify it before separately authorizing another attempt.
+
 Date: **2026-11-13 (Africa/Lagos)**. **STOPPED before broadcast. No automatic retry.**
 
 The owner explicitly approved one `CipherQuizScoring` deployment on Ethereum Sepolia, chain **11155111**, from operator `0xbE4a3DAABCd4406e75314aC7324411249E0C36a2`, at a maximum deployment transaction cost of **0.0015 Sepolia ETH** under the retained **0.02 ETH** project aggregate cap. Other deployments, integration writes, automatic retries, spending-limit changes and merges were excluded.

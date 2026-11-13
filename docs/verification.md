@@ -1,5 +1,15 @@
 # Verification record
 
+## Requested read-only signer and deployment recheck (2026-11-13)
+
+The owner reported correcting the private-key prefix and requested verification only, explicitly withholding deployment authorization. The existing offline verifier was run with `contracts/.env`; it exited **1** with its sanitized failure message and did **not** report `reviewed-signer-matched`. Local format checks found the saved value still unprefixed. The on-disk env file was byte-for-byte identical to the previous stopped attempt, with no inherited operator-key override. An unsaved editor change is a possible explanation, not an established fact. Separate offline derivation with no provider confirmed the public address remains **0xbE4a3DAABCd4406e75314aC7324411249E0C36a2**; identity matching does not satisfy the required deployment format.
+
+The public-only preflight nevertheless passed: chain **11155111**, mined block **12126229** (`0xa2a970c2575ab1978147927f04930b58eadc0ad0e7b0890267721d19012356b0`), finalized block **12126164** (`0xc6e73f780a6fb1b1cd46afb270f61b81ea0c23066b896b29e24c02943eda5eef`), balance **0.05 Sepolia ETH** at both exact blocks, and confirmed/provider-pending nonce **0/0**. Infrastructure parity/code checks passed; creation-bytecode hash remains the reviewed `0x4b033120899ac98fde5d0e1f8eded615afd01a48d825fdcc06766f3bd877cbcf`.
+
+Fresh unsigned gas estimate **8839309**, rounded-up 20% gas limit **10607171**. Configured fee ceiling **100000000 wei/gas (0.1 gwei)**; current suggested maximum/priority **29/2 wei/gas**, both below it. Maximum deployment gas liability **0.0010607171 ETH**, below the **0.0015 ETH** transaction limit and existing **0.002 ETH** invocation allocation. Deployment plus three integration ceilings remains **0.0055607171 ETH**, below the retained **0.02 ETH** cap. These are planning bounds, not authorization for integration or deployment.
+
+Ledger/lock remain absent: **0 wei reserved**, **0.02 ETH remaining**. Both approval flags were unset. The env file was unchanged during verification. No deployment script, signing, broadcast, integration write or reservation operation was invoked. No secret values were printed. Temporary verification tooling was removed. Source/policy/limits are unchanged. **Deployment remains blocked on saved key-format correction, successful strict offline verification and fresh explicit authorization for another attempt.**
+
 ## Approved deployment attempt stopped before broadcast (2026-11-13)
 
 The owner approved one Sepolia `CipherQuizScoring` deployment at **0.0015 ETH** maximum transaction cost under the retained **0.02 ETH** aggregate cap. Final guard update **03870d7** was committed/pushed and passed typechecking, lint and **25 targeted local tests** before the single attempt. Spending limits, Solidity and dependencies were unchanged.
