@@ -1,5 +1,13 @@
 # Verification record
 
+## Approved deployment attempt stopped before broadcast (2026-11-13)
+
+The owner approved one Sepolia `CipherQuizScoring` deployment at **0.0015 ETH** maximum transaction cost under the retained **0.02 ETH** aggregate cap. Final guard update **03870d7** was committed/pushed and passed typechecking, lint and **25 targeted local tests** before the single attempt. Spending limits, Solidity and dependencies were unchanged.
+
+The signer identity matched, but the deployment script stopped at configuration because the private local key representation lacks its required `0x` prefix. The earlier offline verifier accepted that representation through Ethers; it now enforces the same prefix requirement as deployment. No secret value was exposed or rewritten. This corrects the earlier implication that signer matching alone established configuration readiness.
+
+No reservation, signing or broadcast occurred, and there was no retry. Gas estimation/fee checks were not reached; previous estimates remain historical. Post-stop read-only RPC at block **12126167**, chain **11155111**, confirmed **0.05 ETH** balance and **0/0** confirmed/provider-pending nonce. Ledger/lock remain absent; cost/reserved liability **0 ETH**, aggregate allowance **0.02 ETH**. Env file unchanged; both persistent/parent approval flags unset. The deployment approval was scoped only to the terminated child process. See the [execution record](sepolia-deployment.md) for the complete outcome and required next action.
+
 ## Final read-only predeployment review (2026-11-13)
 
 The owner reported offline `reviewed-signer-matched` for `0xbE4a3DAABCd4406e75314aC7324411249E0C36a2`. The [final report](sepolia-final-review.md) supersedes historical pending-signer and deployment-estimate statements. No transaction was signed/broadcast, no production reservation was made and neither approval flag changed. The ignored `contracts/.env` remained byte-for-byte unchanged.

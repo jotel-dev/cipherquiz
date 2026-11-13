@@ -1,5 +1,7 @@
 # Final read-only Sepolia predeployment review
 
+**Subsequent execution checkpoint:** the owner approved one deployment, but its configuration guard stopped the attempt before signing/broadcasting because the local key lacks the required `0x` prefix. No cost/reservation was incurred and no retry was attempted. See the [deployment execution record](sepolia-deployment.md). The review below records the earlier preapproval snapshot.
+
 Reviewed **2026-11-13 (Africa/Lagos)**. **STOP: explicit deployment approval remains pending. No Sepolia transaction was signed or broadcast, no production reservation was created, and neither approval flag was changed.** This report supersedes the estimates and pending-signer statements in the historical [Stage A report](sepolia-predeployment.md). See [verification history](verification.md) and the [execution runbook](sepolia-integration.md).
 
 The checks support requesting approval for one token-free `CipherQuizScoring` deployment, subject to fresh execution-time guards. This focused source review and local testing do not establish production readiness or live FHE/KMS behavior.

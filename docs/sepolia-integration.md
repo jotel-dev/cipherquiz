@@ -1,5 +1,7 @@
 # Sepolia integration preparation and evidence
 
+The approved deployment attempt on 2026-11-13 stopped before broadcast at the key-format guard. The local representation must include the documented `0x` prefix; offline verification now checks this requirement too. No local secret was changed, no transaction/reservation was created and no retry is authorized automatically. See the [execution record](sepolia-deployment.md).
+
 Current checkpoint: the owner reported successful offline verification for the new operator on 2026-11-13. See the [final read-only review](sepolia-final-review.md) for refreshed confirmed funding, deployment gas, retry coverage and remaining blockers. Both approval flags remain unset; integration still requires a different funded player and separate approval. Earlier preparation evidence below is historical.
 
 Initial preparation started on `feat/encrypted-scoring` at `1ba8282`. Stage A review on 2026-11-11 preserved that uncommitted preparation and the frontend work at `8ccbcb9` on `feat/sepolia-fhe-verification`. **No deployment or transaction was submitted during Stage A.** The live test is prepared and type-checked, not verified end to end. See the current [predeployment report and approval checkpoint](sepolia-predeployment.md); earlier preparation evidence below is historical.
