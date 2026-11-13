@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { getAddress, type Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { NotEntitledError } from '@zama-fhe/sdk';
 import {
   AGGREGATE_CAP_WEI,
   MAX_FEE_PER_GAS_WEI,
@@ -95,15 +96,38 @@ export function packAnswer(roundId: bigint, index: number, choice: bigint) {
   return (roundId << 16n) | (BigInt(index) << 8n) | choice;
 }
 
-export function isAclDenial(error: unknown): boolean {
-  // Require the specific SDK ACL error, including through documented cause chains.
-  // A timeout, failed signature, generic DECRYPTION_FAILED or HTTP 403 is insufficient.
+export function isAclDenial(
+  error: unknown,
+  expected?: {
+    account: string;
+    contractAddress: string;
+    encryptedValue: string;
+  },
+): boolean {
+  // SDK 3.7.2 wraps actor ACL rejection in this public typed error. The lower
+  // SDK's .name is FhevmErrorBase even for its ACL subclass; never rely on it.
+  // Generic errors, a bare code, HTTP denial and transport failures are insufficient.
   const seen = new Set<unknown>();
   let current = error;
   while (current && typeof current === 'object' && !seen.has(current)) {
     seen.add(current);
-    if ('name' in current && current.name === 'AclUserDecryptionError')
-      return true;
+    if (
+      current instanceof NotEntitledError &&
+      current.code === 'NOT_ENTITLED'
+    ) {
+      if (!expected) return true;
+      try {
+        return (
+          getAddress(current.account) === getAddress(expected.account) &&
+          getAddress(current.contractAddress) ===
+            getAddress(expected.contractAddress) &&
+          current.encryptedValue.toLowerCase() ===
+            expected.encryptedValue.toLowerCase()
+        );
+      } catch {
+        return false;
+      }
+    }
     current = 'cause' in current ? current.cause : undefined;
   }
   return false;

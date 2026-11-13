@@ -370,7 +370,17 @@ test(
           args: [handle, account],
         });
       }
-      async function deny(sdk: ZamaSDK, handle: Hex, label: string) {
+      async function deny(
+        sdk: ZamaSDK,
+        handle: Hex,
+        label: string,
+        account: Address,
+      ) {
+        const expected = {
+          account,
+          contractAddress: settings.address,
+          encryptedValue: handle,
+        };
         // Explicitly scope any new offchain permit to this scoring contract only.
         checkpoint(`${label}: scoped permit setup`);
         await sdk.permits.grantPermit([settings.address]);
@@ -383,32 +393,35 @@ test(
           }),
         );
         checkpoint(`${label}: SDK ACL denial`);
-        await assert.rejects(async () => {
-          try {
-            const result = await sdk.decryption.decryptValues(
-              [{ encryptedValue: handle, contractAddress: settings.address }],
-              { timeout: 180_000, signal: t.signal },
-            );
-            console.error(
-              JSON.stringify({
-                status: 'unexpected-decryption-success',
-                stage,
-              }),
-            );
-            return result;
-          } catch (error) {
-            console.info(
-              JSON.stringify({
-                status: 'sdk-decryption-rejected',
-                stage,
-                errorTypes: diagnosticErrorTypes(error),
-                acceptedAclEvidence: isAclDenial(error),
-                remoteKmsDenialVerified: false,
-              }),
-            );
-            throw error;
-          }
-        }, isAclDenial);
+        await assert.rejects(
+          async () => {
+            try {
+              const result = await sdk.decryption.decryptValues(
+                [{ encryptedValue: handle, contractAddress: settings.address }],
+                { timeout: 180_000, signal: t.signal },
+              );
+              console.error(
+                JSON.stringify({
+                  status: 'unexpected-decryption-success',
+                  stage,
+                }),
+              );
+              return result;
+            } catch (error) {
+              console.info(
+                JSON.stringify({
+                  status: 'sdk-decryption-rejected',
+                  stage,
+                  errorTypes: diagnosticErrorTypes(error),
+                  acceptedAclEvidence: isAclDenial(error, expected),
+                  remoteKmsDenialVerified: false,
+                }),
+              );
+              throw error;
+            }
+          },
+          (error) => isAclDenial(error, expected),
+        );
         t.diagnostic(
           JSON.stringify({
             operation: label,
@@ -590,7 +603,12 @@ test(
       assert.equal(await allowed(score, operator.address), false);
       checkpoint('pre-finalization score ACL: stranger');
       assert.equal(await allowed(score, stranger.address), false);
-      await deny(participant.sdk, score, 'player before finalization');
+      await deny(
+        participant.sdk,
+        score,
+        'player before finalization',
+        player.address,
+      );
       stage = 'finalization and final ACL';
       await send(author, 'finalizeRound', [roundId]);
       stage = 'duplicate finalization (eth_call only)';
@@ -632,8 +650,8 @@ test(
         }),
       );
       stage = 'unauthorized user decryption';
-      await deny(outsider.sdk, score, 'outsider final score');
-      await deny(author.sdk, score, 'operator final score');
+      await deny(outsider.sdk, score, 'outsider final score', stranger.address);
+      await deny(author.sdk, score, 'operator final score', operator.address);
       t.diagnostic(
         'Live application workflow completed. Remote KMS denial is NOT established by SDK ACL rejection.',
       );

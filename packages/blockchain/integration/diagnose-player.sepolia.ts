@@ -328,13 +328,21 @@ async function main() {
     emit({
       status: 'player-decryption-rejected',
       errorTypes: diagnosticErrorTypes(error),
-      strictAclEvidence: isAclDenial(error),
+      strictAclEvidence: isAclDenial(error, {
+        account: DIAGNOSTIC_PLAYER,
+        contractAddress: SCORING_ADDRESS,
+        encryptedValue: round[4],
+      }),
       remoteKmsRequests: kmsRequests,
       remoteKmsDenialVerified: false,
     });
-    // Preserve the original strict assertion. A wrapper or HTTP denial alone is insufficient.
+    // Require the typed denial for this exact request; HTTP status alone is insufficient.
     assert.ok(
-      isAclDenial(error),
+      isAclDenial(error, {
+        account: DIAGNOSTIC_PLAYER,
+        contractAddress: SCORING_ADDRESS,
+        encryptedValue: round[4],
+      }),
       'Expected strict SDK ACL evidence was not observed',
     );
   }

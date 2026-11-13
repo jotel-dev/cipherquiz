@@ -106,7 +106,7 @@ test('diagnostic guards consume failed attempts and exclude all signing/write RP
     assert.throws(() => assertReadOnlyRpc(method));
 });
 
-test('installed SDK ACL subclass exposes the base name and reproduces the strict classifier mismatch offline', () => {
+test('installed SDK actor denial is recognized despite the underlying base name and is bound to the requested ciphertext', () => {
   // Pure error constructors only: no SDK instance, provider, permit or signature.
   // This pinned internal import verifies the installed implementation, rather
   // than inventing a synthetic .name that the real SDK never exposes.
@@ -135,5 +135,28 @@ test('installed SDK ACL subclass exposes the base name and reproduces the strict
     { cause: aclError },
   );
   assert.equal(error.code, 'NOT_ENTITLED');
-  assert.equal(isAclDenial(error), false);
+  const expected = {
+    account: DIAGNOSTIC_PLAYER,
+    contractAddress: SCORING_ADDRESS,
+    encryptedValue: `0x${'01'.repeat(32)}`,
+  };
+  assert.equal(isAclDenial(error, expected), true);
+  assert.equal(
+    isAclDenial(new Error('wrapper', { cause: error }), expected),
+    true,
+  );
+  error.name = 'SomeOtherRuntimeName';
+  assert.equal(isAclDenial(error, expected), true);
+  for (const mismatch of [
+    { account: SCORING_ADDRESS },
+    { contractAddress: DIAGNOSTIC_PLAYER },
+    { encryptedValue: `0x${'02'.repeat(32)}` },
+    { account: 'invalid' },
+  ])
+    assert.equal(isAclDenial(error, { ...expected, ...mismatch }), false);
+  assert.equal(isAclDenial(aclError, expected), false);
+  assert.equal(
+    isAclDenial({ ...error, code: 'NOT_ENTITLED' }, expected),
+    false,
+  );
 });

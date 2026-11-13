@@ -2,6 +2,8 @@
 
 Date: **2026-11-13**. Contract **0x4b4c204d28D5ee37896278C5fc56d61086f92b53**, Ethereum Sepolia **11155111**, round **1**, player **0xc0a50A4E032b19c905509E8f5EFD35fC7EA82D49**. **Exactly one player permit was signed and one SDK decryption was attempted. Zero onchain writes, zero retries and no operator/stranger permits. The diagnostic is stopped.**
 
+Subsequent work: the owner separately authorized a [typed SDK assertion correction and one round 1 finalization](sepolia-round-1-finalization.md). The failed assertion and local regression described below are historical results from this one-shot diagnostic; the corrected predicate has not been replayed through a live decryption request.
+
 ## Precise observed result
 
 The new, separately approved diagnostic reproduced a **denial-classification defect in the test harness**, while confirming that player decryption is intentionally prohibited before finalization:

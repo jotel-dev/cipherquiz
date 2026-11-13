@@ -170,21 +170,22 @@ test('denial evidence excludes network errors and unrelated SDK failures', () =>
   assert.equal(isAclDenial({ status: 403 }), false);
   assert.equal(
     isAclDenial({ cause: { name: 'AclUserDecryptionError' } }),
-    true,
+    false,
   );
   const cyclic: { cause?: unknown } = {};
   cyclic.cause = cyclic;
   assert.equal(isAclDenial(cyclic), false);
-  // SDK 3.7.2 wraps underlying ACL errors. A typed wrapper alone is not proof
-  // that the original invocation reached ACL preflight, much less remote KMS.
+  // Untrusted name/code-shaped objects are not instances of the installed SDK class.
   assert.equal(isAclDenial({ name: 'NotEntitledError' }), false);
   assert.equal(
     isAclDenial({
       name: 'NotEntitledError',
       cause: { name: 'AclUserDecryptionError' },
     }),
-    true,
+    false,
   );
+  assert.equal(isAclDenial({ code: 'NOT_ENTITLED' }), false);
+  assert.equal(isAclDenial({ name: 'FhevmErrorBase' }), false);
 });
 
 test('failure diagnostics retain allowlisted types without serializing sensitive fields', () => {
