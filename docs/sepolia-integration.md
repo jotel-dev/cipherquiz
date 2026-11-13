@@ -1,5 +1,7 @@
 # Sepolia integration preparation and evidence
 
+**Current state (2026-11-13):** following strict signer verification and separate authorization, one `CipherQuizScoring` deployment succeeded at **0x4b4c204d28D5ee37896278C5fc56d61086f92b53**, chain **11155111**. Conservative aggregate budget remaining is **0.0187271396 ETH**. No integration transaction has been authorized or run. Keep the existing ignored spending journal; do not create a fresh budget or rerun deployment. The original deployment script intentionally requires nonce zero; the operator's nonce is now one. Integration still needs a separately configured/funded player and explicit approval. See the [execution record](sepolia-deployment.md); older preparation and format failures below are historical.
+
 The approved deployment attempt on 2026-11-13 stopped before broadcast at the key-format guard. The local representation must include the documented `0x` prefix; offline verification now checks this requirement too. No local secret was changed, no transaction/reservation was created and no retry is authorized automatically. See the [execution record](sepolia-deployment.md).
 
 Current checkpoint: the owner reported successful offline verification for the new operator on 2026-11-13. See the [final read-only review](sepolia-final-review.md) for refreshed confirmed funding, deployment gas, retry coverage and remaining blockers. Both approval flags remain unset; integration still requires a different funded player and separate approval. Earlier preparation evidence below is historical.
