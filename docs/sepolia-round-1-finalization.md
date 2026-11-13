@@ -2,6 +2,8 @@
 
 Date: **2026-11-13**. Target: **0x4b4c204d28D5ee37896278C5fc56d61086f92b53**, Ethereum Sepolia **11155111**, existing round **1**. Immutable operator **0xbE4a3DAABCd4406e75314aC7324411249E0C36a2**; player **0xc0a50A4E032b19c905509E8f5EFD35fC7EA82D49**.
 
+**Subsequent separately authorized verification:** the finalization receipt reached Sepolia's canonical finalized checkpoint, and one player-only real SDK/KMS request **decrypted the unchanged score to exactly 2/4**. See the [remote decryption report](sepolia-round-1-decryption.md). The finalization-time decryption/finality limitations below are historical observations; no extra onchain transaction or budget change occurred during the later verification. Independent unauthorized remote KMS denial remains unverified.
+
 ## Local assertion correction
 
 The [single offchain diagnostic](sepolia-player-offchain-diagnostic.md) established that the installed lower SDK's ACL subclass exposes `.name = FhevmErrorBase`, while the public high-level SDK returns `NotEntitledError` with code `NOT_ENTITLED`. The denial assertion now requires that public SDK class **and** its stable code, following cycle-safe cause chains. Production callers additionally compare the error's account, contract and ciphertext to the exact denied request. Changing `.name` no longer changes the result.

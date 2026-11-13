@@ -6,6 +6,8 @@ See the subsequent [read-only diagnosis](sepolia-integration-diagnosis.md) for f
 
 **Later separately authorized recovery:** after the SDK mismatch was diagnosed and corrected locally, **one `finalizeRound(1)` succeeded**. Round 1 is now Finalized with the same encrypted score and player access enabled; decryption remains unverified. Current retained allowance is **0.0182746774 ETH**. See the [finalization report](sepolia-round-1-finalization.md). The partial execution and Submitted state described below are the original invocation's historical outcome.
 
+**Later player-only verification:** a separately authorized single offchain request subsequently verified canonical finality and real SDK/KMS decryption of the existing score as **2/4**, without writes, retries or budget changes. See the [decryption report](sepolia-round-1-decryption.md). The decryption-unverified observations below describe earlier stages, and independent unauthorized remote KMS denial remains unverified.
+
 ## Authorization and prechecks
 
 The owner explicitly authorized one invocation against **0x4b4c204d28D5ee37896278C5fc56d61086f92b53**, Ethereum Sepolia **11155111**, limited to operator `createRound`, player `submitAnswers`, operator `finalizeRound`, **0.0015 ETH per write / 0.0045 ETH combined**, and the retained **0.02 ETH** project cap. Reviewed single-contract EIP-712 permits of at most 30 days were authorized for the player/operator/ephemeral stranger. No extra deployment, staking, funding, limit change, merge or automatic retry was authorized.
