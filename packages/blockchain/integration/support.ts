@@ -25,6 +25,11 @@ export function readSettings(env: NodeJS.ProcessEnv) {
     'approved',
     'Set CIPHERQUIZ_SEPOLIA_TEST=approved only for an authorized live test',
   );
+  return readIntegrationConfig(env);
+}
+
+// Shared offline validation. This does not grant approval or invoke a wallet/SDK.
+export function readIntegrationConfig(env: NodeJS.ProcessEnv) {
   const rpc = required(env, 'SEPOLIA_RPC_URL');
   assert.equal(new URL(rpc).protocol, 'https:', 'Sepolia RPC must use HTTPS');
   const address = getAddress(required(env, 'CIPHERQUIZ_SEPOLIA_ADDRESS'));

@@ -11,6 +11,7 @@ import {
   isAclDenial,
   maskImmutables,
   packAnswer,
+  readIntegrationConfig,
   readSettings,
 } from '../integration/support.js';
 
@@ -58,6 +59,24 @@ test('live settings isolate signer roles and require explicit positive fee budge
     env.CIPHERQUIZ_PLAYER_PRIVATE_KEY,
   ).address;
   assert.equal(readSettings(env).maxFeePerGas, 100_000_000n);
+  const unapproved = {
+    ...env,
+    CIPHERQUIZ_SEPOLIA_TEST: undefined,
+    CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI: '4500000000000000',
+  };
+  assert.equal(
+    readIntegrationConfig(unapproved).totalGasBudget,
+    4500000000000000n,
+  );
+  assert.throws(() => readSettings(unapproved), /authorized live test/);
+  assert.throws(
+    () =>
+      readIntegrationConfig({
+        ...unapproved,
+        CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI: '4499999999999999',
+      }),
+    /complete three-write ceiling/,
+  );
   assert.throws(
     () => readSettings({ ...env, CIPHERQUIZ_PLAYER_ADDRESS: '' }),
     /Missing CIPHERQUIZ_PLAYER_ADDRESS/,

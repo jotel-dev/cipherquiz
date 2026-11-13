@@ -1,5 +1,7 @@
 # Read-only encrypted scoring integration preparation
 
+**Subsequent readiness checkpoint:** finalized funding, target configuration and exact **0.0045 ETH** invocation allocation are now verified/prepared. Both approval flags remain unset and the retained ledger remains **0.0187271396 ETH**. See the [final readiness and signature-scope report](sepolia-integration-readiness.md), which supersedes earlier missing-configuration and 0.005 ETH proposal statements below. No integration write or signature has occurred.
+
 Prepared **2026-11-13 (Africa/Lagos)**. **STOP: integration execution and signatures are not authorized.** No Sepolia transaction, decryption permit, round, encryption request, KMS request or production budget reservation was created during this preparation. Local security tests use isolated disposable mock signers. Deployed code, spending limits, populated env files and approval flags are unchanged.
 
 ## Verified deployment and receipt cost

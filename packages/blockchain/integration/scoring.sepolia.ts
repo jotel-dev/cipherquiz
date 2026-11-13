@@ -365,6 +365,8 @@ test(
         });
       }
       async function deny(sdk: ZamaSDK, handle: Hex, label: string) {
+        // Explicitly scope any new offchain permit to this scoring contract only.
+        await sdk.permits.grantPermit([settings.address]);
         await assert.rejects(
           sdk.decryption.decryptValues(
             [{ encryptedValue: handle, contractAddress: settings.address }],
@@ -574,6 +576,7 @@ test(
         false,
       );
       stage = 'authorized KMS user decryption';
+      await participant.sdk.permits.grantPermit([settings.address]);
       const decryptStarted = Date.now();
       const result = await participant.sdk.decryption.decryptValues(
         [{ encryptedValue: score, contractAddress: settings.address }],
