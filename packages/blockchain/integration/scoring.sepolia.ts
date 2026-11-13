@@ -35,17 +35,11 @@ import {
   packAnswer,
   readSettings,
 } from './support.js';
-
-const abi = parseAbi([
-  'function OPERATOR() view returns (address)',
-  'function confidentialProtocolId() view returns (uint256)',
-  'function createRound(address player, uint64 deadline, bytes32 contentHash, bytes32[] keys, bytes proof) returns (uint64 roundId)',
-  'function submitAnswers(uint64 roundId, bytes32[] answers, bytes proof)',
-  'function finalizeRound(uint64 roundId)',
-  'function getRound(uint64 roundId) view returns (address player, uint64 deadline, bytes32 contentHash, uint8 state, bytes32 score, uint256 questionCount)',
-  'function getKeyHandle(uint64 roundId, uint256 index) view returns (bytes32)',
-  'event RoundOpened(uint64 indexed roundId, address indexed player)',
-]);
+import {
+  CREATION_HASH,
+  integrationCeilings,
+  scoringAbi as abi,
+} from './reviewed-deployment.js';
 const aclAbi = parseAbi([
   'function persistAllowed(bytes32 handle, address account) view returns (bool)',
   'function isAllowedForDecryption(bytes32 handle) view returns (bool)',
@@ -61,9 +55,9 @@ test(
     const sdks: ZamaSDK[] = [];
     try {
       const settings = readSettings(process.env);
+      const ceilings = integrationCeilings(settings.maxFeePerGas);
       assert.ok(
-        3n * MAX_GAS_PER_TX * settings.maxFeePerGas <=
-          readBudgetLedger().remainingWei,
+        ceilings.total <= readBudgetLedger().remainingWei,
         'Insufficient aggregate headroom for complete three-write integration',
       );
       const operator = privateKeyToAccount(settings.operatorKey);
@@ -90,7 +84,8 @@ test(
       );
       const artifact = JSON.parse(
         await readFile(new URL('CipherQuizScoring.json', artifactDir), 'utf8'),
-      ) as { abi: Abi; deployedBytecode: Hex };
+      ) as { abi: Abi; bytecode: Hex; deployedBytecode: Hex };
+      assert.equal(keccak256(artifact.bytecode), CREATION_HASH);
       const dbg = JSON.parse(
         await readFile(
           new URL('CipherQuizScoring.dbg.json', artifactDir),
@@ -168,6 +163,10 @@ test(
       }
       const [acl, executor, kms] = stored as [Address, Address, Address];
       assert.equal(acl, getAddress(fheSepolia.aclContractAddress));
+      assert.equal(
+        executor,
+        getAddress('0x92C920834Ec8941d2C77D188936E1f7A6f49c127'),
+      );
       assert.equal(kms, getAddress(fheSepolia.kmsContractAddress));
       const inputVerifier = await client.readContract({
         address: executor,
@@ -187,10 +186,14 @@ test(
           'FHEVM infrastructure missing',
         );
       }
-      for (const account of [operator, player]) {
+      for (const [account, requiredBalance] of [
+        [operator, ceilings.operator],
+        [player, ceilings.player],
+      ] as const) {
         assert.ok(
-          (await client.getBalance({ address: account.address })) > 0n,
-          'Signer needs Sepolia ETH',
+          (await client.getBalance({ address: account.address })) >=
+            requiredBalance,
+          'Signer needs funding for its complete integration ceiling',
         );
       }
       t.diagnostic(
@@ -249,6 +252,7 @@ test(
         await client.simulateContract(data);
         const estimate = await client.estimateContractGas(data);
         const gas = (estimate * 120n + 99n) / 100n;
+        assert.ok(gas <= MAX_GAS_PER_TX, 'Transaction gas ceiling exceeded');
         const fees = await client.estimateFeesPerGas();
         assert.ok(
           fees.maxFeePerGas <= settings.maxFeePerGas,
@@ -448,6 +452,15 @@ test(
         assert.equal(await allowed(handle, settings.address), true);
         assert.equal(await allowed(handle, player.address), false);
         assert.equal(await allowed(handle, stranger.address), false);
+        assert.equal(
+          await client.readContract({
+            address: acl,
+            abi: aclAbi,
+            functionName: 'isAllowedForDecryption',
+            args: [handle],
+          }),
+          false,
+        );
       }
       stage = 'real answer encryption and input proof';
       const answerEncryptionStarted = Date.now();
@@ -533,6 +546,8 @@ test(
       assert.notEqual(score, toHex(0, { size: 32 }));
       assert.equal(await allowed(score, settings.address), true);
       assert.equal(await allowed(score, player.address), false);
+      assert.equal(await allowed(score, operator.address), false);
+      assert.equal(await allowed(score, stranger.address), false);
       await deny(participant.sdk, score, 'player before finalization');
       stage = 'finalization and final ACL';
       await send(author, 'finalizeRound', [roundId]);

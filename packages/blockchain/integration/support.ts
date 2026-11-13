@@ -6,6 +6,10 @@ import {
   MAX_FEE_PER_GAS_WEI,
   assertReviewedOperator,
 } from '../../../contracts/scripts/sepolia-policy.js';
+import {
+  assertReviewedDeployment,
+  integrationCeilings,
+} from './reviewed-deployment.js';
 
 export function required(env: NodeJS.ProcessEnv, name: string): string {
   const value = env[name];
@@ -23,6 +27,7 @@ export function readSettings(env: NodeJS.ProcessEnv) {
   const rpc = required(env, 'SEPOLIA_RPC_URL');
   assert.equal(new URL(rpc).protocol, 'https:', 'Sepolia RPC must use HTTPS');
   const address = getAddress(required(env, 'CIPHERQUIZ_SEPOLIA_ADDRESS'));
+  assertReviewedDeployment(address);
   function key(name: string): Hex {
     const value = required(env, name);
     assert.match(value, /^0x[0-9a-fA-F]{64}$/, `Invalid ${name} format`);
@@ -55,6 +60,10 @@ export function readSettings(env: NodeJS.ProcessEnv) {
   assert.ok(
     totalGasBudget <= AGGREGATE_CAP_WEI,
     'Invocation budget exceeds aggregate cap',
+  );
+  assert.ok(
+    totalGasBudget >= integrationCeilings(maxFeePerGas).total,
+    'Invocation budget cannot cover the complete three-write ceiling',
   );
   return {
     rpc,

@@ -11,6 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.integration.json",
     "test": "tsx --test test/*.test.ts",
     "preflight:sepolia": "tsx integration/preflight.sepolia.ts",
+    "prepare:sepolia": "tsx integration/prepare.sepolia.ts",
     "test:sepolia": "tsx --test integration/scoring.sepolia.ts"
   },
   "dependencies": {

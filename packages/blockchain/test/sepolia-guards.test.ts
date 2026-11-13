@@ -3,6 +3,11 @@ import { test } from 'node:test';
 import { generatePrivateKey } from 'viem/accounts';
 import { REVIEWED_OPERATOR } from '../../../contracts/scripts/sepolia-policy.js';
 import {
+  SCORING_ADDRESS,
+  assertReviewedDeployment,
+  integrationCeilings,
+} from '../integration/reviewed-deployment.js';
+import {
   isAclDenial,
   maskImmutables,
   packAnswer,
@@ -39,7 +44,7 @@ test('live settings isolate signer roles and require explicit positive fee budge
   const env = {
     CIPHERQUIZ_SEPOLIA_TEST: 'approved',
     SEPOLIA_RPC_URL: 'https://example.invalid',
-    CIPHERQUIZ_SEPOLIA_ADDRESS: '0x0000000000000000000000000000000000000001',
+    CIPHERQUIZ_SEPOLIA_ADDRESS: SCORING_ADDRESS,
     CIPHERQUIZ_OPERATOR_PRIVATE_KEY: operatorKey,
     CIPHERQUIZ_OPERATOR_ADDRESS: REVIEWED_OPERATOR,
     CIPHERQUIZ_PLAYER_PRIVATE_KEY: operatorKey,
@@ -57,6 +62,23 @@ test('live settings isolate signer roles and require explicit positive fee budge
       assert.throws(() => readSettings({ ...env, [name]: value }));
     }
   }
+  assert.throws(
+    () =>
+      readSettings({
+        ...env,
+        CIPHERQUIZ_MAX_TOTAL_GAS_COST_WEI: '2000000000000000',
+      }),
+    /complete three-write ceiling/,
+  );
+  assert.throws(
+    () =>
+      readSettings({
+        ...env,
+        CIPHERQUIZ_SEPOLIA_ADDRESS:
+          '0x0000000000000000000000000000000000000001',
+      }),
+    /reviewed deployment/,
+  );
   assert.throws(
     () =>
       readSettings({
@@ -80,6 +102,22 @@ test('live settings isolate signer roles and require explicit positive fee budge
       CIPHERQUIZ_PLAYER_PRIVATE_KEY: `0x${'0'.repeat(64)}`,
     }),
   );
+});
+
+test('integration pins the deployed contract and funds both signer roles under unchanged ceilings', () => {
+  assert.equal(SCORING_ADDRESS, '0x4b4c204d28D5ee37896278C5fc56d61086f92b53');
+  assert.doesNotThrow(() =>
+    assertReviewedDeployment(SCORING_ADDRESS.toLowerCase()),
+  );
+  assert.throws(() => assertReviewedDeployment(REVIEWED_OPERATOR));
+  assert.deepEqual(integrationCeilings(100000000n), {
+    perTransaction: 1500000000000000n,
+    operator: 3000000000000000n,
+    player: 1500000000000000n,
+    total: 4500000000000000n,
+  });
+  for (const fee of [0n, -1n, 100000001n])
+    assert.throws(() => integrationCeilings(fee));
 });
 
 test('packed inputs enforce bounds and preserve maximum round identity', () => {
