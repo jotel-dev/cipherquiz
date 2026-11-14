@@ -1,5 +1,7 @@
 # Planned confidential architecture
 
+**Current architecture checkpoint (2026-11-14):** the [ERC-7984 staking/payout design](confidential-staking-architecture.md) and [local-only prototype record](confidential-staking-local-validation.md) supersede the unresolved staking sketch below. Real token-free Sepolia scoring and authorized **2/4** KMS decryption succeeded; confidential staking remains local/design-only. A new score-sharing/funding-aware deployment is required for the proposed production flow. No live staking deployment, token transfer or approval is authorized.
+
 Status: this document retains the longer-term design proposal. Phase 1 implements health checks and toolchain scaffolding. Phase 2 now implements a token-free local scoring subset; the [implemented architecture](encrypted-scoring.md) is authoritative for that contract, including its single-player rounds, batch deadline, encrypted context binding and final-score ACL. The settlement flows below remain unimplemented proposals.
 
 The [Sepolia preparation record](sepolia-integration.md) separates the new live-test harness from verified local mock results. Deployment and real network validation remain pending approval and configuration; confidential staking remains blocked.

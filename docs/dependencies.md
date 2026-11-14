@@ -1,5 +1,7 @@
 # Dependency decisions
 
+**2026-11-14 local staking architecture:** exact **@openzeppelin/confidential-contracts 0.5.3**, **@openzeppelin/contracts 5.6.1** and required **@openzeppelin/contracts-upgradeable 5.6.1** peers were verified against official npm/tagged source, installed without lifecycle scripts or audit, and compiled/tested with the unchanged **FHEVM Solidity 0.11.1 / Solidity 0.8.27** toolchain. The lab uses non-upgradeable contracts; installing the upgradeable peer does not introduce a proxy. No prior package version was upgraded. See the [current architecture](confidential-staking-architecture.md) for upstream source links, token candidates, limits and the lack of an audit claim. Older Phase 1/2 dependency statements below are historical.
+
 Phase 2 update (2026-11-11): no dependency or lockfile changes. The [encrypted-scoring record](encrypted-scoring.md#sdk-compatibility-boundary) distinguishes executed plugin/legacy-relayer local workflows from type-checked current-SDK APIs and unverified current-SDK wire compatibility. Current SDK generic encryption/decryption APIs exist; token-focused examples are not the only available surface.
 
 Reviewed on 2026-11-10 using official sources and npm registry metadata. Resolved package versions are recorded in package-lock.json; docs/verification.md records the installed versions.
