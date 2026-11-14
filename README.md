@@ -6,6 +6,8 @@ Confidential Web3 trivia, built independently for the Zama Developer Program Mai
 
 ## Current development milestone: Hidden Score Arena
 
+The [complete local token-free Arena engine](docs/hidden-score-arena-engine.md) adds exact challenge consent, encrypted scoring/entitlements, restricted cancellation, frontend read ABI and security tests. See the [gated Sepolia integration plan](docs/hidden-score-arena-sepolia-plan.md) for required source/wallet/approval work. Actual staking custody and funded activation remain future work; no Arena deployment is included.
+
 The [two-player Arena architecture](docs/hidden-score-arena-architecture.md) and [local validation report](docs/hidden-score-arena-local-validation.md) cover encrypted ten-question scores, confidential comparison, ties, timeouts, replay protection and participant ACL. The local fixtures hold no tokens and do not establish production or remote multiplayer readiness. The [single-player staking architecture](docs/confidential-staking-architecture.md), frontend and [verified single-player Sepolia/KMS result](docs/sepolia-round-1-decryption.md) are preserved.
 
 The Phase 1/2 descriptions below are historical snapshots; current evidence is in the linked reports and [verification record](docs/verification.md). No Arena deployment or live execution is included.

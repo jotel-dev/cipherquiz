@@ -1,5 +1,17 @@
 # Verification record
 
+## Hidden Score Arena Phase B: complete token-free local engine (2026-11-14)
+
+On **`feat/hidden-score-arena`**, based on synchronized **`64ce617`**, implemented [HiddenScoreArena](../contracts/src/HiddenScoreArena.sol), a local-only consumer and adversarial input issuer, pure client commitments/encoding/ABI and **30 engine + four client cases**. See [contract/compatibility/security documentation](hidden-score-arena-engine.md) and the [precise gated Sepolia plan](hidden-score-arena-sepolia-plan.md). This is complete token-free gameplay; actual token admission/custody/payouts remain the separate funded stage.
+
+The engine commits ten common ordered leaves/keys, freezes role/domain/rules/timing identity, requires matching player consent, computes two private scores and encrypted units, handles ties/forfeits/no-shows and restricts cancellation to prevent publisher/opponent abuse. Proof imports explicitly reject the library's empty-proof pre-authorized-handle alternative; a real local ACL fixture regression proves that policy. Frontend ABI matches compiled functions/outputs/event indexing, including the inherited protocol getter. ACL negatives are mock evidence, not remote KMS denial.
+
+**`npm run check` passed** builds, workspace typechecks, ESLint/Solhint, formatting and **108 tests** (3 API, 4 frontend, 26 blockchain, 75 Hardhat), no failures/skips. Every score 0..10, low/high ties, exact deadlines, actual last-second inclusion, invalid transitions/proofs, replay rollback, wrong contexts, cancellation rights, score/unit ACL, transient consumer composition and maximum packing ID are covered. Engine deployed-size planning is **11,356 bytes**; one local submission measured **4,840,352 global HCU / 1,158,032 depth**, finalization **606,224 / 492,000**. No metric is a live fee/latency or cryptographic assurance.
+
+The original scorer's creation/ABI hashes match the reviewed values; legacy scoring/staking/Phase A fixtures, frontend source, live runners, policy/manifests and lockfile are unchanged. Env/journal hashes match task-start snapshots. No secrets are logged, no external Ethereum RPC/live signer/permit/transaction is invoked, and no approval flag, reservation or 0.02 ETH spending cap is changed. All Ethereum transactions executed only on disposable Hardhat 31337. Final exact configured-secret scanning, documentation formatting/link/diff checks and remote hash synchronization precede stop; this does not claim an audit or production readiness.
+
+Verified pushed checkpoints: **`3531a50`**, **`df6c1e0`**, **`2724d51`**, each checked against its actual remote branch hash immediately after push. Final documentation commit is reported with its hash after synchronization. No PR, merge, deployment or further live execution is initiated.
+
 ## Hidden Score Arena architecture and local FHE comparison (2026-11-14)
 
 Created **`feat/hidden-score-arena`** from synchronized staking head **`5fe1c5c`**, preserving all previous scoring, frontend, Sepolia and ERC-7984 work. [Arena architecture](hidden-score-arena-architecture.md) specifies a separate two-player ten-question scorer, immutable pre-stake content/key/terms, confidential comparison and equal-stake settlement, exact-lock refunds, ACL, publisher trust, question reuse/randomness, gas limits and staged release gates. The [local validation report](hidden-score-arena-local-validation.md) explicitly separates symbolic entitlement from money and mock decryption from real KMS evidence.

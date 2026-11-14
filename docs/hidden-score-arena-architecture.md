@@ -1,5 +1,7 @@
 # Hidden Score Arena: Phase A architecture
 
+**Subsequent gameplay implementation:** [Phase B engine](hidden-score-arena-engine.md) completes the local token-free lifecycle and adds explicit waiting-room cancellation/consent rules. The originally proposed funded-engine stage below remains outstanding; its actual locks/admission/custody are not implemented by token-free entitlement units. See the [gated Sepolia plan](hidden-score-arena-sepolia-plan.md). Phase A evidence below is retained as history.
+
 Reviewed **2026-11-14 (Africa/Lagos)**. Branch **`feat/hidden-score-arena`**, based on verified staking head **`5fe1c5c81bb69f444237c1a975932902946829bc`**. This specifies the proposed funded game and distinguishes it from the [local proof of concept](hidden-score-arena-local-validation.md). It is not an audit, production readiness claim or deployment authorization.
 
 ## Scope and migration

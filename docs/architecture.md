@@ -1,5 +1,7 @@
 # Planned confidential architecture
 
+**Phase B gameplay checkpoint:** the [complete local Arena engine](hidden-score-arena-engine.md) implements token-free two-player lifecycle, challenge consent, FHE result/entitlement and read interfaces. Its [Sepolia plan](hidden-score-arena-sepolia-plan.md) identifies blockers and exact approval gates. Funding/admission and token custody remain the separate funded stage; no live deployment or UI change occurred.
+
 **Hidden Score Arena checkpoint (2026-11-14):** the [two-player architecture and implementation gates](hidden-score-arena-architecture.md) and [local proof-of-concept evidence](hidden-score-arena-local-validation.md) specify the new mode separately from the single-player design below. A separate scorer/settlement component is required; the deployed scoring contract, approved UI and completed staking work remain unchanged. Arena is local/design-only.
 
 **Current architecture checkpoint (2026-11-14):** the [ERC-7984 staking/payout design](confidential-staking-architecture.md) and [local-only prototype record](confidential-staking-local-validation.md) supersede the unresolved staking sketch below. Real token-free Sepolia scoring and authorized **2/4** KMS decryption succeeded; confidential staking remains local/design-only. A new score-sharing/funding-aware deployment is required for the proposed production flow. No live staking deployment, token transfer or approval is authorized.
