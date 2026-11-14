@@ -532,6 +532,43 @@ describe('Hidden Score Arena complete token-free engine', function () {
     );
   });
 
+  it('rejects even pre-authorized ciphertexts without a fresh input proof', async function () {
+    const issuer = await (
+      await ethers.getContractFactory('ArenaInputReuseLab')
+    ).deploy();
+    await issuer.waitForDeployment();
+    const id = await active();
+    await send(issuer, a, 'authorize', a.address, address, words(id, 0, 10));
+    const handles = await Promise.all(
+      Array.from({ length: 10 }, (_, i) => issuer.getFunction('handles')(i)),
+    );
+    const { ACLAddress } = await fhevm.getCoprocessorConfig(address);
+    const acl = new ethers.Contract(
+      ACLAddress,
+      ['function persistAllowed(bytes32,address) view returns (bool)'],
+      ethers.provider,
+    );
+    assert.equal(
+      await acl.getFunction('persistAllowed')(handles[0], a.address),
+      true,
+    );
+    assert.equal(
+      await acl.getFunction('persistAllowed')(handles[0], address),
+      true,
+    );
+    await assert.rejects(
+      send(arena, a, 'submitAnswers', id, handles, '0x'),
+      error('InvalidSetup'),
+    );
+    assert.equal((await meta(id)).submitted, 0n);
+    assert.equal(await arena.getFunction('usedInputs')(handles[0]), false);
+    await assert.rejects(
+      send(arena, operator, 'createRound', 2n, config, handles, '0x'),
+      error('InvalidSetup'),
+    );
+    assert.equal(await arena.getFunction('nextRoundId')(), 2n);
+  });
+
   it('rejects reused handles and masks fresh wrong round, seat and position words', async function () {
     const first = await active(),
       second = await active();

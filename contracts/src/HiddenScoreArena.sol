@@ -143,7 +143,8 @@ contract HiddenScoreArena is CipherQuizFoundation {
     if (expectedId != nextRoundId || expectedId > MAX_ROUND_ID)
       revert InvalidSetup();
     _validate(config);
-    if (keys.length != 10) revert InvalidSetup();
+    // The library's empty-proof pre-authorized-handle path is outside this protocol.
+    if (keys.length != 10 || proof.length == 0) revert InvalidSetup();
     roundId = nextRoundId;
     ++nextRoundId;
     Round storage round = _rounds[roundId];
@@ -230,7 +231,7 @@ contract HiddenScoreArena is CipherQuizFoundation {
       revert InvalidState();
     // solhint-disable-next-line gas-strict-inequalities
     if (block.timestamp >= round.deadline) revert DeadlinePassed();
-    if (answers.length != 10) revert InvalidSetup();
+    if (answers.length != 10 || proof.length == 0) revert InvalidSetup();
     round.submitted |= uint8(1 << seat);
     euint8 score = FHE.asEuint8(0);
     for (uint256 i; i < 10; ++i) {

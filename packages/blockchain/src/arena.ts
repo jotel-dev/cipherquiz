@@ -3,13 +3,14 @@ import {
   encodeAbiParameters,
   keccak256,
   parseAbi,
+  toBytes,
   type Address,
   type Hex,
 } from 'viem';
 import type { EncryptParams } from '@zama-fhe/sdk';
 
-export const arenaRulesHash = keccak256(
-  new TextEncoder().encode('CipherQuiz.Arena.TokenFree.v1'),
+export const arenaRulesHash = /* @__PURE__ */ keccak256(
+  /* @__PURE__ */ toBytes('CipherQuiz.Arena.TokenFree.v1'),
 );
 export const maxArenaRoundId = (1n << 47n) - 1n;
 
@@ -148,7 +149,7 @@ export function arenaEncryptionRequest(params: {
 }
 
 // Deliberately explicit ABI, tested against the Solidity compiler artifact to prevent drift.
-export const arenaAbi = parseAbi([
+export const arenaAbi = /* @__PURE__ */ parseAbi([
   'function confidentialProtocolId() view returns (uint256)',
   'function OPERATOR() view returns (address)',
   'function CONSUMER() view returns (address)',
