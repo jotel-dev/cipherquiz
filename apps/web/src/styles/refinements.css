@@ -1,0 +1,44 @@
+/* Keep the round's state and actions in view on narrow and short screens. */
+.quiz-hud {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--background);
+  padding-bottom: 12px;
+}
+.quiz-hud .quiz-top {
+  position: static;
+}
+
+/* Body copy remains readable on handheld screens; tiny labels are decorative. */
+@media (max-width: 767px) {
+  .hero-support,
+  .step p,
+  .privacy-copy > p:not(.eyebrow),
+  .tiers-description {
+    font-size: 14px;
+  }
+  .category-card p {
+    font-size: 13px;
+  }
+  .category-card-meta,
+  .privacy-caveat p,
+  .payout-note,
+  .footer-bottom > p {
+    font-size: 12px;
+  }
+  .answer-option {
+    font-size: 15px;
+  }
+  .quiz-question > p.muted {
+    font-size: 12px;
+  }
+  .quiz-footnote {
+    font-size: 10px;
+  }
+  .notice p,
+  .notice strong,
+  .checkbox-label {
+    font-size: 12px;
+  }
+}

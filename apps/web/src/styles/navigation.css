@@ -1,0 +1,128 @@
+/* Render the complete supplied dark lockup; no screenshot crop or text substitute. */
+.brand-image {
+  display: block;
+  width: 158px;
+  height: auto;
+  aspect-ratio: 3;
+  border-radius: 5px;
+  object-fit: contain;
+}
+.site-header {
+  height: 82px;
+}
+.nav-inner {
+  gap: 10px;
+}
+.nav-actions {
+  gap: 6px;
+}
+.wallet-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 11px;
+}
+.wallet-label {
+  display: none;
+}
+.network-label {
+  display: none;
+}
+.footer-main .brand-image {
+  width: 180px;
+}
+.mobile-menu nav a {
+  font-size: 20px;
+  min-height: 52px;
+  padding-block: 10px;
+}
+.mobile-menu > h2 {
+  font-size: 23px;
+}
+.mobile-menu > p {
+  margin-bottom: 13px;
+}
+.site-footer-home .footer-main {
+  grid-template-columns: 1fr;
+  gap: 20px;
+  padding-bottom: 24px;
+}
+.site-footer-home .footer-main > div:first-child > p,
+.site-footer-home .footer-note {
+  display: none;
+}
+.site-footer-home .footer-links {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 600px) {
+  .brand-image {
+    width: 192px;
+  }
+  .site-header {
+    height: 91px;
+  }
+  .wallet-label {
+    display: inline;
+  }
+  .wallet-button {
+    padding-inline: 14px;
+    font-size: 12px;
+  }
+}
+@media (min-width: 1024px) {
+  .site-footer-home .footer-main {
+    grid-template-columns: 180px 1fr;
+    align-items: center;
+    gap: 35px;
+  }
+  .site-footer-home .footer-links {
+    grid-template-columns: repeat(6, max-content);
+    justify-content: end;
+    gap: 24px;
+  }
+  .site-header {
+    height: 96px;
+  }
+  .brand-image {
+    width: 198px;
+  }
+  .desktop-nav {
+    margin-left: 0;
+    gap: 15px;
+  }
+  .desktop-nav > a {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .desktop-nav > a.active::after {
+    bottom: -25px;
+  }
+  .nav-actions {
+    gap: 10px;
+  }
+  .network-label {
+    display: none;
+  }
+  .wallet-button {
+    font-size: 11px;
+    padding-inline: 12px;
+  }
+}
+@media (min-width: 1280px) {
+  .brand-image {
+    width: 210px;
+  }
+  .desktop-nav {
+    gap: 21px;
+  }
+  .desktop-nav > a {
+    font-size: 12px;
+  }
+  .network-label {
+    display: flex;
+    font-size: 10px;
+  }
+  .nav-actions {
+    gap: 15px;
+  }
+}

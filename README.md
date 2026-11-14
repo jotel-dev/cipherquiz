@@ -4,9 +4,25 @@ Confidential Web3 trivia, built independently for the Zama Developer Program Mai
 
 > This project is not audited, endorsed or operated by Zama. Use at your own risk.
 
+## Current development milestone: Hidden Score Arena
+
+The [complete local token-free Arena engine](docs/hidden-score-arena-engine.md) adds exact challenge consent, encrypted scoring/entitlements, restricted cancellation, frontend read ABI and security tests. See the [gated Sepolia integration plan](docs/hidden-score-arena-sepolia-plan.md) for required source/wallet/approval work. Actual staking custody and funded activation remain future work; no Arena deployment is included.
+
+The [two-player Arena architecture](docs/hidden-score-arena-architecture.md) and [local validation report](docs/hidden-score-arena-local-validation.md) cover encrypted ten-question scores, confidential comparison, ties, timeouts, replay protection and participant ACL. The local fixtures hold no tokens and do not establish production or remote multiplayer readiness. The [single-player staking architecture](docs/confidential-staking-architecture.md), frontend and [verified single-player Sepolia/KMS result](docs/sepolia-round-1-decryption.md) are preserved.
+
+The Phase 1/2 descriptions below are historical snapshots; current evidence is in the linked reports and [verification record](docs/verification.md). No Arena deployment or live execution is included.
+
 ## Phase 1: foundation
 
 This repository provides a working React preview, Fastify health endpoints, PostgreSQL connection boundary, shared types, wallet configuration and a locally compilable FHEVM toolchain. There is no game engine, question bank content, staking, token transfer, SDK encryption/decryption integration or deployment.
+
+## Phase 2: local encrypted scoring
+
+A token-free scoring contract and local FHEVM tests now cover encrypted keys and answers, encrypted scores, immutable round setup, deadlines, replay prevention and player-only final score access. Run `npm test -w @cipherquiz/contracts`. The frontend remains the Phase 1 preview; no browser/API scoring integration or deployment is included.
+
+Keys are encrypted onchain, but their authoring operator knows their plaintext. Local FHEVM mocks do not establish live cryptographic confidentiality. See the [implemented contract architecture, SDK compatibility evidence and security limits](docs/encrypted-scoring.md), and the [verification record](docs/verification.md).
+
+An approval-gated Sepolia deployment script and separate current-SDK integration test are prepared. Neither has been exercised against a deployment. See the [Sepolia runbook and evidence boundaries](docs/sepolia-integration.md) before configuring or running them. Normal checks remain local.
 
 Quiza is gameplay inspiration only. No Quiza source code was used.
 
@@ -64,7 +80,7 @@ npm run start -w @cipherquiz/api
 npm run preview -w @cipherquiz/web
 ```
 
-Vite preview serves static assets only; its development API proxy is not a production deployment configuration. A future host must route same-origin API requests appropriately. `npm run node -w @cipherquiz/contracts` starts an optional local chain; the tests start their own in-process chain. There are no deployment commands.
+Vite preview serves static assets only; its development API proxy is not a production deployment configuration. A future host must route same-origin API requests appropriately. `npm run node -w @cipherquiz/contracts` starts an optional local chain; the tests start their own in-process chain. The separate Sepolia deployment command requires explicit approval and secure configuration; normal checks never invoke it.
 
 ## Repository map
 
@@ -96,6 +112,6 @@ The wallet provider is configured for Sepolia but has no transaction UI. No toke
 
 ## Next milestone
 
-Design and validate a local encrypted-scoring proof of concept with dummy data, a reviewed round state machine and explicit ACL tests. Prove that unauthorized users cannot decrypt keys, answers or scores; then benchmark ten-question execution and decide timing and anti-replay rules. Staking and ERC-7984 settlement follow only after those boundaries are tested.
+Validate the current application SDK against the contract on a supported FHEVM network with dummy data, including real proof rejection and unauthorized decryption denial. Review network latency, content integrity, timing fairness and metadata leakage before browser/API scoring integration. The local proof of concept and ten-question mock benchmark are complete; live cryptographic compatibility remains unverified. Staking and ERC-7984 settlement remain separate later work.
 
 See [verification](docs/verification.md) for completed checks and remaining integration limits.
