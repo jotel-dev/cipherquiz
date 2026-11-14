@@ -1,5 +1,13 @@
 # Verification record
 
+## Hidden Score Arena architecture and local FHE comparison (2026-11-14)
+
+Created **`feat/hidden-score-arena`** from synchronized staking head **`5fe1c5c`**, preserving all previous scoring, frontend, Sepolia and ERC-7984 work. [Arena architecture](hidden-score-arena-architecture.md) specifies a separate two-player ten-question scorer, immutable pre-stake content/key/terms, confidential comparison and equal-stake settlement, exact-lock refunds, ACL, publisher trust, question reuse/randomness, gas limits and staged release gates. The [local validation report](hidden-score-arena-local-validation.md) explicitly separates symbolic entitlement from money and mock decryption from real KMS evidence.
+
+Prototype commit **`fc94bb44c2c2c50b763bf67449809cbb34e8a179`** passed targeted checks and was pushed with matching remote hash. Two local-only 31337 contracts and **18 new cases** verify encrypted scoring/comparison/ties, private scores/outcomes, transient consumer ACL, both forfeits, deadlines, cancellation, immutable setup, invalid transitions, proof binding and replay rollback. The consumer holds no tokens. No complete funded game, new frontend mode or live runner was implemented.
+
+**`npm run check` passed** builds, workspace typechecks, ESLint/Solhint, formatting and **74 tests** (3 API, 4 frontend, 22 blockchain, 45 Hardhat), zero failures/skips. Original scoring creation/ABI hashes still match reviewed V1; protected source/configuration/package diffs are empty. A bounded **74-file** changed/generated exact configured-secret scan found zero matches. Mid-check env/journal snapshots match afterward. No live Ethereum operation, permit, spend, reservation/approval change, merge or deployment occurred. Final changes after the full check are documentation-only, checked before commit/push and remote synchronization.
+
 ## ERC-7984 staking architecture and isolated local prototype (2026-11-14)
 
 Work is isolated on **`feat/erc7984-staking-architecture`**, based on the verified **`74b43e0`** scoring/decryption commit. Reviewed current official ERC-7984 draft, Zama protocol/registry/wrapper/ACL/HCU/SDK documentation and OZ v0.5.3 source/npm peer metadata. Added only exact OZ confidential **0.5.3**, contracts **5.6.1** and required upgradeable **5.6.1** peers, preserving FHEVM **0.11.1**, SDK **3.7.2**, compiler/plugin and prior dependency versions. No install lifecycle scripts or automatic advisory audit ran.

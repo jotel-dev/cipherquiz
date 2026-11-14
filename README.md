@@ -4,6 +4,12 @@ Confidential Web3 trivia, built independently for the Zama Developer Program Mai
 
 > This project is not audited, endorsed or operated by Zama. Use at your own risk.
 
+## Current development milestone: Hidden Score Arena
+
+The [two-player Arena architecture](docs/hidden-score-arena-architecture.md) and [local validation report](docs/hidden-score-arena-local-validation.md) cover encrypted ten-question scores, confidential comparison, ties, timeouts, replay protection and participant ACL. The local fixtures hold no tokens and do not establish production or remote multiplayer readiness. The [single-player staking architecture](docs/confidential-staking-architecture.md), frontend and [verified single-player Sepolia/KMS result](docs/sepolia-round-1-decryption.md) are preserved.
+
+The Phase 1/2 descriptions below are historical snapshots; current evidence is in the linked reports and [verification record](docs/verification.md). No Arena deployment or live execution is included.
+
 ## Phase 1: foundation
 
 This repository provides a working React preview, Fastify health endpoints, PostgreSQL connection boundary, shared types, wallet configuration and a locally compilable FHEVM toolchain. There is no game engine, question bank content, staking, token transfer, SDK encryption/decryption integration or deployment.
